@@ -3,9 +3,11 @@ title: "writeup"
 output: html_notebook
 ---
 
-```{r}
+<!-- code_folding is for present with hiding code in markdown code_folding: hide-->
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 library(dplyr)
- #' A single play of the Martingale strategy
+#' A single play of the Martingale strategy
 #'
 #' Takes a state list, spins the roulette wheel, returns the state list with updated values (for example, budget, plays, etc)
 #' @param state A list with the following entries: 
@@ -119,9 +121,9 @@ mean(walk_out_money - 200)
    
 
 ANSWER
-##You should explain how you used computer simulation to calculate the average earnings of a gambler that uses this strategy. As part of the explanation, provide a figure (or a series of figures) that show how the gamblers earnings (or losses) evolve over a series of wagers at the roulette wheel. (The x-axis will be the wager number (or play number), the y-axis will be earnings.) The code below provides all the functions you’ll need to calculate average earnings.
+### You should explain how you used computer simulation to calculate the average earnings of a gambler that uses this strategy. As part of the explanation, provide a figure (or a series of figures) that show how the gamblers earnings (or losses) evolve over a series of wagers at the roulette wheel. (The x-axis will be the wager number (or play number), the y-axis will be earnings.) The code below provides all the functions you’ll need to calculate average earnings.
 
-```{r}
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 earnings <- one_series(B = 200, W = 300, L = 1000, M = 100) - 200
 
 plot(earnings)
@@ -129,9 +131,9 @@ plot(earnings)
 
 
 
-##Show your audience how changing a parameter of the simulation (see table below) does or does not have an impact on average earnings. A figure would be helpful.
+### Show your audience how changing a parameter of the simulation (see table below) does or does not have an impact on average earnings. A figure would be helpful.
 
-```{r}
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 B <- seq(50,500,50)
 avg_earnings <- rep(NA, length(B))
 for(i in 1:length(B)){
@@ -139,16 +141,23 @@ for(i in 1:length(B)){
   for(j in seq_along(walk_out_money)){
     walk_out_money[j] <- one_series(B = B[i], W = 300, L = 1000, M = 100) %>% get_last
   }
-  avg_earnings[i] <- mean(walk_out_money - 200)
+  avg_earnings[i] <- (mean(walk_out_money)-B)
 }
 
 plot(B, avg_earnings)
 ```
 
-##See the stopping rule below. Explain to your audience how you used computer simulation to estimate the average number of plays before stopping. The code below will need to be modified to calculate this quantity.
+### See the stopping rule below. Explain to your audience how you used computer simulation to estimate the average number of plays before stopping. The code below will need to be modified to calculate this quantity.
 
 If the player wins more than $100 then it will stop. If the player loses all the money he brings to the table then it will stop. If the player has been spinned for more than 1000 times,it will stop as well. 
 
+```{r cache=TRUE,message=FALSE, warning=FALSE}
+play_times <- rep(NA, 1000)
+for(j in seq_along(play_times)){
+  play_times[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% length
+}
+```
 
-##Be sure to explain the limitations of the simulation; identify simplifications or other sources of uncertainty.
-It only runs 100 times. This simulation doesn't count the back box cases in. In the reality, things may be more comlicated and unpredictable.
+
+### Be sure to explain the limitations of the simulation; identify simplifications or other sources of uncertainty.
+It only runs 1000 times. This simulation doesn't count the back box cases in. In the reality, things may be more comlicated and unpredictable.
