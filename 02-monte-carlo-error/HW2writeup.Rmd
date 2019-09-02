@@ -44,7 +44,5 @@ lines(R, rel_error[,4], col="green")
 lines(R, rel_error[,5], col="black")
 ```
 
-
-view(abs_error)
 ```
 
