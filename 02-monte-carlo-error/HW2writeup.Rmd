@@ -1,12 +1,12 @@
 ---
-title: "R Notebook"
+title: "HW2writeup"
 output: html_notebook
 ---
 
 ```{r}
-p <- c(0.01, 0.05, 0.10, 0.25, 0.50)
-R <- 2^(2:15)
-phat<- matrix(NA,length(R),length(p))
+p <- c(0.01, 0.05, 0.10, 0.25, 0.50) #probability 
+R <- 2^(2:15) #R
+phat<- matrix(NA,length(R),length(p)) #matrix is one way to do it, also try dataframes later.  
 for(i in 1: length(p)){
   for (j in 1:length(R)){
     phat[j,i]<-rbinom(1,R[j],p[i])/R[j]
@@ -15,7 +15,6 @@ for(i in 1: length(p)){
 }
 
 abs_error <- matrix(NA, length(R), length(p))
-
 for (i in 1: length(R)) {
   abs_error[i,] <- abs(p-phat[i,])
 }
@@ -29,45 +28,22 @@ for (i in 1: length(R)) {
 
 
 
-
-plot(R,seq(0,.15,length.out= length(R)),type="n")
+plot(R,seq(0,.06,length.out= length(R)),type="n")
 lines(R, abs_error[,1], col="red")
+lines(R, abs_error[,2], col="blue")
+lines(R, abs_error[,3], col="yellow")
+lines(R, abs_error[,4], col="green")
+lines(R, abs_error[,5], col="black")
 
-view(abs_error)     
 
+plot(R,seq(0,.25,length.out= length(R)),type="n")
+lines(R, rel_error[,1], col="red")
+lines(R, rel_error[,2], col="blue")
+lines(R, rel_error[,3], col="yellow")
+lines(R, rel_error[,4], col="green")
+lines(R, rel_error[,5], col="black")
 ```
 
-```{r}
-```{r}
-p <- c(0.01, 0.05, 0.10, 0.25, 0.50)
-R <- 2^(2:15)
-
-abs_error <- matrix(NA,length(R),length(p))
-for(i in 1: length(p)){
-  for (j in 1:length(R)){
-    phat[j,i]<-onecal(R[j], p[i])
-    
-  }
-}
-
-abs_error <- matrix(NA, length(R), length(p))
-
-for (i in 1: length(R)) {
-  abs_error[i,] <- abs(p-phat[i,])
-}
-
-
-rel_error <- matrix(NA, length(R), length(p))
-
-for (i in 1: length(R)) {
-  rel_error[i,] <- (abs_error[i,]/p)
-}
-
-
-
-
-plot(R,seq(0,.15,length.out= length(R)),type="n")
-lines(R, abs_error[,1], col="red")
 
 view(abs_error)
 ```
