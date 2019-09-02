@@ -2,7 +2,16 @@
 title: "HW2writeup"
 output: html_notebook
 ---
+Monte Carlo smiluation is always repeat random sampling to estimate numerical results. But the simulation may have some error when generate approximate answers.Therefore, it is necessary to know the error for each replicate number.  
+For exmaple, when you flip a coin for 10 times, the head shows up 6 times. So the mean of out is 0.6. But the real probability for get a head is 0.5. Therefore, the absolute error is 
+absolute error = |p̂−p|
 
+and
+
+relative error = |p̂−p|/p.
+
+
+#matrix
 ```{r}
 p <- c(0.01, 0.05, 0.10, 0.25, 0.50) #probability 
 R <- 2^(2:15) #R
@@ -44,5 +53,66 @@ lines(R, rel_error[,4], col="green")
 lines(R, rel_error[,5], col="black")
 ```
 
+#dataframes 
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+ss1 <- expand.grid(
+  N = 2^(2:15),
+  p = c(0.5, 0.25, 0.1, 0.05, 0.01),
+  mae = NA_real_,
+  mre = NA_real_
+  ) 
+
+one_calc <- function (N,p){
+  Y<-rbinom(100000, N, p)
+  phat <- Y/N
+  abs_error <- abs(phat - p)
+  rel_error <- abs_error/p
+  c(mean(abs_error), mean(rel_error))
+}
+
+for(i in 1: nrow(ss1)){
+  ss1[i,c("mae", "mre")]<- one_calc(ss1[i, "N"], ss1[i,"p"])
+}
+
+ss1$xlog2 <- log2(ss1$N)
+plot.new()
+plot.window(xlim=range(0, 15), ylim=range(ss1$mae)) #xlim=range(ss1$xlog2)
+l1<- ss1 %>% split(.$p)
+for(j in seq_along(l1)){
+  lines(l1[[j]]$xlog2, l1[[j]]$mae, type="b", pch=16, col=j)
+  text(2, l1[[j]]$mae[1], l1[[j]]$p[1], pos=2)
+}
+
+
+axis(1, 2:15, 2^(2:15))
+axis(2)
+box()
+
+#use T's package to plot 
+# ss1 %>%
+#   plot_setup(mae~xlog2) %>%
+#   split(.$p) %>%
+#   lwith(lines(xlog2,))
+```
+
+```{r}
+ss1$xlog2 <- log2(ss1$N)
+plot.new()
+plot.window(xlim=range(0, 15), ylim=range(ss1$mre)) #xlim=range(ss1$xlog2)
+l1<- ss1 %>% split(.$p)
+for(j in seq_along(l1)){
+  lines(l1[[j]]$xlog2, l1[[j]]$mre, type="b", pch=16, col=j)
+  text(2, l1[[j]]$mre[1], l1[[j]]$p[1], pos=2)
+}
+
+axis(1, 2:15, 2^(2:15))
+axis(2)
+box()
 ```
 
