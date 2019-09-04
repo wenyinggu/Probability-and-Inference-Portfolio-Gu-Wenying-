@@ -1,5 +1,5 @@
 ---
-title: "HW2writeup"
+title: "How to Avoid your Error for Investments"
 output: html_notebook
 ---
 Monte Carlo smiluation is always repeat random sampling to estimate numerical results. But the simulation may have some error when generate approximate answers.Therefore, it is necessary to know the error for each replicate number.  

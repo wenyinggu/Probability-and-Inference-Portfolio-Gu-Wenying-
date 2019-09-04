@@ -1,6 +1,8 @@
 ---
 title: "How you Lose your Money in the Roulette"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 <!-- code_folding is for present with hiding code in markdown code_folding: hide-->
