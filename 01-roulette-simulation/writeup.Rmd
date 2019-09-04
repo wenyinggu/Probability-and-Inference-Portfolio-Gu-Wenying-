@@ -1,5 +1,5 @@
 ---
-title: "writeup"
+title: "How you Lose your Money in the Roulette"
 output: html_notebook
 ---
 
