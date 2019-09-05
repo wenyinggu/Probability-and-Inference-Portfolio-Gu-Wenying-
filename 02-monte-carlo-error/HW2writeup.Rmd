@@ -1,9 +1,24 @@
 ---
 title: "How to Avoid your Error for Investments"
-output: html_notebook
+date: "9/3/2019"
+author: "Wenying Gu"
+output:
+  html_document:
+    code_folding: hide
+    theme: cosmo
+    toc: yes
+    toc_depth: 5
+    toc_float: true
+editor_options: 
+  chunk_output_type: inline
 ---
-Monte Carlo smiluation is always repeat random sampling to estimate numerical results. But the simulation may have some error when generate approximate answers.Therefore, it is necessary to know the error for each replicate number.  
-For exmaple, when you flip a coin for 10 times, the head shows up 6 times. So the mean of out is 0.6. But the real probability for get a head is 0.5. Therefore, the absolute error is 
+### Email: [wenying.gu@vanderbilt.edu]()
+
+## Monte Carlo Smiluation
+Monte Carlo smiluation is always repeat random sampling to estimate numerical results. But the simulation may have some error when generate approximate answers.Therefore, it is necessary to know the error for each replicate number. For exmaple, when you flip a coin for 10 times, the head shows up 6 times. So 6 is the sum of out. Then the phat (mean of out) is 6/10=0.6 (mean of out/replicates). But the real probability for get a head is 0.5. Therefore, the absolute error is |phat-probability|=|0.6-0.5|=0.1. Relative error is relative error/probability= 0.1/0.5=0.2
+
+Here is the formula for absolute error and relative error
+
 absolute error = |p̂−p|
 
 and
@@ -11,8 +26,10 @@ and
 relative error = |p̂−p|/p.
 
 
-#matrix
-```{r}
+## Matrix Method
+Here is one way to calculate the error, including absolute error and relative error. We know create a 14 X 5 matrix that estimates the error for each combination of replicate number (2^2, 2^3, 2^4...2^15) and probability (0.01, 0.05, 0.10, 0.25, 0.50). Let p̂ denote the probability estimated from simulation, and let p denote the true underlying probability. 
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 p <- c(0.01, 0.05, 0.10, 0.25, 0.50) #probability 
 R <- 2^(2:15) #R
 phat<- matrix(NA,length(R),length(p)) #matrix is one way to do it, also try dataframes later.  
@@ -23,19 +40,15 @@ for(i in 1: length(p)){
   }
 }
 
+```
+
+Absolute error 
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 abs_error <- matrix(NA, length(R), length(p))
 for (i in 1: length(R)) {
   abs_error[i,] <- abs(p-phat[i,])
 }
-
-
-rel_error <- matrix(NA, length(R), length(p))
-
-for (i in 1: length(R)) {
-  rel_error[i,] <- (abs_error[i,]/p)
-}
-
-
 
 plot(R,seq(0,.06,length.out= length(R)),type="n")
 lines(R, abs_error[,1], col="red")
@@ -44,6 +57,17 @@ lines(R, abs_error[,3], col="yellow")
 lines(R, abs_error[,4], col="green")
 lines(R, abs_error[,5], col="black")
 
+```
+
+
+Relative error 
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
+rel_error <- matrix(NA, length(R), length(p))
+
+for (i in 1: length(R)) {
+  rel_error[i,] <- (abs_error[i,]/p)
+}
 
 plot(R,seq(0,.25,length.out= length(R)),type="n")
 lines(R, rel_error[,1], col="red")
@@ -51,16 +75,22 @@ lines(R, rel_error[,2], col="blue")
 lines(R, rel_error[,3], col="yellow")
 lines(R, rel_error[,4], col="green")
 lines(R, rel_error[,5], col="black")
+
 ```
 
-#dataframes 
 
-```{r}
+
+
+## Dataframes Method
+
+To have a 14 X 5 Dataframe is another method to calculate the errors. We can use pacakge ggplot in dataframes method. 
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 library(tidyverse)
 library(ggplot2)
 ```
 
-```{r}
+Absolute error
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 ss1 <- expand.grid(
   N = 2^(2:15),
   p = c(0.5, 0.25, 0.1, 0.05, 0.01),
@@ -101,7 +131,8 @@ box()
 #   lwith(lines(xlog2,))
 ```
 
-```{r}
+Relative error 
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 ss1$xlog2 <- log2(ss1$N)
 plot.new()
 plot.window(xlim=range(0, 15), ylim=range(ss1$mre)) #xlim=range(ss1$xlog2)

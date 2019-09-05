@@ -1,26 +1,43 @@
 ---
 title: "How you Lose your Money in the Roulette"
+date: "9/3/2019"
+author: "Wenying Gu"
 output:
   html_document:
-    df_print: paged
+    code_folding: hide
+    theme: cosmo
+    toc: yes
+    toc_depth: 5
+    toc_float: true
+editor_options: 
+  chunk_output_type: inline
 ---
 
-<!-- code_folding is for present with hiding code in markdown code_folding: hide-->
+### Email: [wenying.gu@vanderbilt.edu]()
+
+## What is the Roulette?
+
+![A roulette table composed of 38 (or 37) evenly sized pockets on a wheel. The pockets are colored red, black, or green. The pockets are also numbered. Roulette is a game of chance in which a pocket is randomly selected. Gamblers may wager on several aspects of the outcome. For example, one may place a wager that the randomly selected pocket will be red or odd numbered or will be a specific number.](https://www.wikihow.com/images/thumb/1/11/Win-at-Roulette-Step-1-Version-3.jpg/aid2732921-v4-900px-Win-at-Roulette-Step-1-Version-3.jpg)
+
+
+## Description of parameters: 
+
+This is a single play of the roulette. Some concepts have been defined as following:
+
+#'B              number: the budget;
+#'W              number: the budget threshold for successfully stoping;
+#'L              number: the maximum number of plays; 
+#'M              number: the casino wager limit; 
+#‘plays          integer: the number of plays executed;
+
+
+## One play 
+
+We will define the wager and then spin the wheel for one time. It will result in a new wager for us. We can win or lose the money after plays. This code will show both conditions.
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
 library(dplyr)
-#' A single play of the Martingale strategy
-#'
-#' Takes a state list, spins the roulette wheel, returns the state list with updated values (for example, budget, plays, etc)
-#' @param state A list with the following entries: 
-#'   B              number, the budget
-#'   W              number, the budget threshold for successfully stoping
-#'   L              number, the maximum number of plays 
-#'   M              number, the casino wager limit
-#'   plays          integer, the number of plays executed
-#'   previous_wager number, the wager in the previous play (0 at first play)
-#'   previous_win   TRUE/FALSE, indicator if the previous play was a win (TRUE at first play)
-#' @return The updated state list
+
 one_play <- function(state){
   
     # Wager
@@ -45,12 +62,19 @@ one_play <- function(state){
   state
 }
 
+```
 
-#' Stopping rule
-#'
-#' Takes the state list and determines if the gambler has to stop
-#' @param state A list.  See one_play
-#' @return TRUE/FALSE
+## Stopping rule
+
+Play roulette to either bankruptcy, success, or play limits
+
+B number, the starting budget
+W number, the budget threshold for successfully stoping
+L number, the maximum number of plays 
+M number, the casino wager limit
+A vector of budget values calculated after each play.
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 stop_play <- function(state){
   if(state$B <= 0) return(TRUE)
   if(state$plays >= state$L) return(TRUE)
@@ -59,13 +83,6 @@ stop_play <- function(state){
 }
 
 
-#' Play roulette to either bankruptcy, success, or play limits
-#'
-#' @param B number, the starting budget
-#' @param W number, the budget threshold for successfully stoping
-#' @param L number, the maximum number of plays 
-#' @param M number, the casino wager limit
-#' @return A vector of budget values calculated after each play.
 one_series <- function(
     B = 200
   , W = 300
@@ -99,9 +116,15 @@ one_series <- function(
   budget    
 }
 
+```
+
+## Walk out money 
+
+After a series of plays, player will walk out the cacino based on the stopping rules defined above. The moeny they left can be calculate as following codes to estimate average earnings (walk out money). 
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
 # helper function
 get_last <- function(x) x[length(x)] 
-
 
 # Simulation
 walk_out_money <- rep(NA, 1000)
@@ -117,23 +140,21 @@ mean(walk_out_money > 200)
 
 # Estimated earnings
 mean(walk_out_money - 200)
-
 ```
-  
-   
 
-ANSWER
-### You should explain how you used computer simulation to calculate the average earnings of a gambler that uses this strategy. As part of the explanation, provide a figure (or a series of figures) that show how the gamblers earnings (or losses) evolve over a series of wagers at the roulette wheel. (The x-axis will be the wager number (or play number), the y-axis will be earnings.) The code below provides all the functions you’ll need to calculate average earnings.
+# Homework Question 
+## Average earnings  
+If the gambler's starting budget is 200, and budget threshold for successfully stoping is 300. He could only play at most 1000 times. Besides the casino wager limits is 100. We defined our B,W,L,M and run the simulation to get a walk out money when the gambler stop playing. And Earnings= would out money- starting budget which is 200. Here is the graph that we have.
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
-earnings <- one_series(B = 200, W = 300, L = 1000, M = 100) - 200
+Earnings <- one_series(B = 200, W = 300, L = 1000, M = 100) - 200
 
-plot(earnings)
+plot(Earnings, xlab = "Wager Number" )
 ```
 
 
-
-### Show your audience how changing a parameter of the simulation (see table below) does or does not have an impact on average earnings. A figure would be helpful.
+## Parameters of the simulation does not have an impact on average earnings 
+We pick the starting budget randomly from 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, and remain other parameters the same. Running the simulation for 1000 times, the average earning money will not be affected. Here is the graph
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
 B <- seq(50,500,50)
@@ -149,17 +170,19 @@ for(i in 1:length(B)){
 plot(B, avg_earnings)
 ```
 
-### See the stopping rule below. Explain to your audience how you used computer simulation to estimate the average number of plays before stopping. The code below will need to be modified to calculate this quantity.
-
-If the player wins more than $100 then it will stop. If the player loses all the money he brings to the table then it will stop. If the player has been spinned for more than 1000 times,it will stop as well. 
+## Estimate the average number of plays before stopping. 
+To calculate the average number of plays before stopping, we add length to the simulation and get average play number is around 200. 
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
 play_times <- rep(NA, 1000)
 for(j in seq_along(play_times)){
   play_times[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% length
 }
+
+avg_play_times<- mean(play_times)
+avg_play_times
 ```
 
 
-### Be sure to explain the limitations of the simulation; identify simplifications or other sources of uncertainty.
+## Limitation of the simulation
 It only runs 1000 times. This simulation doesn't count the back box cases in. In the reality, things may be more comlicated and unpredictable.
