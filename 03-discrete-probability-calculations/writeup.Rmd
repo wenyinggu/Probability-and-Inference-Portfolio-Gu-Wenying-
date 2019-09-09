@@ -1,0 +1,125 @@
+---
+title: "MLB World Series-Braves Continued his Feud with Yankees"
+date: "9/8/2019"
+author: "Wenying Gu"
+output:
+  html_document:
+    code_folding: hide
+    theme: cosmo
+    toc: yes
+    toc_depth: 6
+    toc_float: true
+editor_options: 
+  chunk_output_type: inline
+---
+### Email: [wenying.gu@vanderbilt.edu]()
+
+## How the MLB Playoffs Work?
+
+The winners of the ALCS and NLCS advance to the World Series, the best-of-seven-game playoff. Prior to the 2002 season, a home-field advantage (games 1, 2, 6, and 7) alternated every year between the leagues. A rule change that year altered that approach, giving home-field advantage to the league that won that year's All-Star Game. MLB changed the rules again in 2017. Now, the home-field advantage goes to the team that has the better overall regular-season record. 
+
+The first team to win four games in the best-of-seven-game series becomes the Major League champion. The 2016 World Series, pitting the Chicago Cubs against the Cleveland Indians, was noteworthy because it was the first time those two teams had met in the championship. It was also Chicago's first World Series title since 1908. 2017 was the Houston franchise's first-ever World Series win.
+
+[Reference from Scott Kendrick](https://www.liveabout.com/how-mlb-playoffs-work-321331)
+
+## Let's Start! (Assumptions)
+
+![Suppose that the Braves and the Yankees are teams competing in the World Series.    Suppose that in any given game, the probability that the Braves win is PB and the probability that the Yankees win is PY = 1 − PB.](C:\Users\user\Desktop\B VS Y.jpg)
+
+## Probability that the Braves win the World Series 
+
+Given that PB = 0.55, we have two methods to find the probability.
+
+Braves won after 4 games | Braves won 4 times in 4 games
+
+Braves won after 5 games | Braves won 3 times in the first 4 games and won one more time in 5th game
+
+Braves won after 6 games | Braves won 3 times in the first 5 games and won one more time in 6th game
+
+Braves won after 7 games | Braves won 3 times in the first 6 games and won one more time in 7th game
+
+```{r}
+dbinom(4,4,0.55)+
+dbinom(3,4,0.55)*0.55+
+dbinom(3,5,0.55)*0.55+
+dbinom(3,6,0.55)*0.55
+
+```
+
+Given that PB = 0.55,then PY = 1-0.55=0.45
+
+Yankees could win at most 3 times or less during the world series to meet the assumption that Braves finally won the game. 
+
+Therefore
+
+Yankees could win 3 times before Braves finally won the game.
+
+Yankees could win 2 times before Braves finally won the game.
+
+Yankees could win 1 times before Braves finally won the game.
+
+Yankees could win 0 times before Braves finally won the game.
+
+We can use pbinom(3,7,0.45) to calculate the probability 
+
+```{r}
+pbinom(3,7,0.45)
+```
+
+Given that PB is unknown but is from 0.5 to 1. Here is graph to show the probability of Braves wins world series as PB changes. 
+```{r}
+pb<-seq(0.5,1,0.0001)
+p<-pbinom(3,7,1-pb)
+plot(p~pb, main="Probability of winning the World Series",xlab="Probability of the Braves winning a head-to-head matchup",ylab="Pr(Win World Series)", type="l", xlim=c(0.5,1), ylim=c(0,1))
+
+```
+
+
+Suppose one could change the World Series to be best-of-9 or some other best-of-X series. What is the shortest series length so that P(Braves win World Series|PB = .55) ≥ 0.8?
+
+```{r}
+
+for(i in seq(3,9999,2)){
+  p<-pbinom((i-1)/2,i,0.45)
+  if (p>=0.8){
+    print(i)
+  break
+  }
+}
+
+```
+
+What is the shortest series length so that P(Braves win World Series|PB = x) ≥ 0.8? 
+
+```{r}
+length(seq(0.5,1,0.01))
+series <- rep(NA, 51)
+for (j in seq(1, 51)) {
+  pb = 0.49 + 0.01 * j 
+  for (i in seq(3, 9999, 2)) {
+    p = pbinom((i-1) / 2, i, 1 - pb)
+    if (p >= 0.8){
+      series[j] <- i
+      break
+    }
+  }
+}
+plot(y=series,x=seq（0.5,1,0.01),main="Shortest series so that P(Win WS given p)>=0.8",xlab="Probability of the Braves winning a head-to-head matchup",ylab="Series length", type = "l",xlim=c(0.5,1), ylim=c(0,2000))
+
+```
+
+Calculate P(PB = 0.55|Braves win World Series in 7 games) under the assumption that either PB = 0.55 or PB = 0.45. Explain your solution.
+
+P(PB = 0.55|Braves win World Series in 7 games) = 0.55
+
+Based on Bayes' theorem, write down the form below. Since we only have two PB choice here, therefore P(PB = 0.55) = P(PB = 0.45) = 1/2 = 0.5
+
+![Bayes' theorem](C:\Users\user\Desktop\1568014491(1).png)
+
+```{r}
+dnbinom(3,4,0.55)
+dnbinom(3,4,0.45)
+(dnbinom(3,4,0.55)*0.5)/(dnbinom(3,4,0.45)*0.5+dnbinom(3,4,0.55)*0.5)
+```
+
+
