@@ -110,6 +110,8 @@ p_hat_without<- mean(Win_game)
 p_hat_without
 
 ```
+The probability without home field advantage that Braves win the world series by simulation is 0.551.
+
 
 Here is the probability with home field advantage that the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC} and $\ P_{B}$ =0.55.  
 
@@ -125,7 +127,6 @@ hfi <- c(0,0,1,1,1,0,0)
 
 j = 0
 Win_game <- rep(NA, 100000)
-hfi<-rep(NA,7)
 round <- hfi
 for(i in seq_along(Win_game)){
   for (k in seq_along(hfi)){
@@ -133,18 +134,18 @@ for(i in seq_along(Win_game)){
     round[k]<- rbinom(1,1,p_win)
   }
   #Win_game[i]
-  if (sum(round) >= 4){
+  if (sum(round)>=4){
     Win_game[i] <- 1
-  }else{
- Win_game[i] <- 0 
+  }
+  else{
+    Win_game[i] <- 0 
  }
 }
 
 p_hat_with<- mean(Win_game)
 p_hat_with
 ```
-```
-
+The probability with home field advantage that Braves win the world series by simulation is 0.602.
 
 
 What is the absolute and relative error for your simulation in the previous question?
@@ -158,19 +159,19 @@ and
 relative error = |p̂−p|/p.
 
 ```{r}
-abs_error_without<- abs(pb-p_hat_without)
-rel_error_without<- abs(pb-p_hat_without)/pb
-abs_error_without 
+pb_with<-0.604221
+pb_without<-0.6082878
+abs_error_without<- abs(pb_without-p_hat_without)
+rel_error_without<- abs(pb_without-p_hat_without)/pb_without
+abs_error_with<- abs(pb_with-p_hat_with)
+rel_error_with<- abs(pb_with-p_hat_with)/pb_with
+abs_error_without
+rel_error_without
+abs_error_with
+rel_error_with
 ```
-
-
-
-
-```{r}
-abs_error_without<- abs(pb-p_hat_without)
-rel_error_without<- abs(pb-p_hat_without)/pb
-
-```
-
-
+The absolute error without home field advantage is 0.057
+The relative error without home field advantage is 0.094
+The absolute error with home field advantage is 0.002
+The relative error with home field advantage is 0.003
 
