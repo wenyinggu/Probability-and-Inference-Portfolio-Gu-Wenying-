@@ -2,3 +2,4 @@
 [HW2](02-monte-carlo-error/writeup.html)
 [HW3](03-discrete-probability-calculations/writeup.html)
 [HW4](04-home-fiedld-advantage/writeup.html)
+[HW5](05-quantile-precision/writeup.html)
