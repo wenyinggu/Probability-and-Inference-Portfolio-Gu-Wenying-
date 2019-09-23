@@ -1,0 +1,366 @@
+---
+title: "Which quantiles of a continuous distribution can one estimate with more precision?"
+date: "9/22/2019"
+author: "Wenying Gu"
+output:
+  html_document:
+    code_folding: hide
+    theme: united 
+    highlight: tango
+    toc: yes
+    toc_depth: 6 
+    toc_float: true
+editor_options: 
+  chunk_output_type: inline
+---
+### Email: [wenying.gu@vanderbilt.edu]()
+
+## Why Median is Not Enough?
+The median is an important quantity in data analysis. It represents the middle value of the data distribution. Estimates of the median, however, have a degree of uncertainty because (a) the estimates are calculated from a finite sample and (b) the data distribution of the underlying data is generally unknown. One important roles of a data scientist is to quantify and to communicate the degree of uncertainty in his or her data analysis.
+
+![Mode; Median; Mean; Distribution](https://upload.wikimedia.org/wikipedia/commons/d/de/Comparison_mean_median_mode.svg)
+
+## Let's Start! (Assumptions)
+
+## What is Normal Distribution?
+
+Definition:
+Normal Distribution is a function that represents the distribution of many random variables as a symmetrical bell-shaped graph.
+
+Background Information:
+Dnorm gives the density, pnorm gives the distribution function, qnorm gives the quantile function, and rnorm generates random deviates.
+
+The length of the result is determined by n for rnorm, and is the maximum of the lengths of the numerical arguments for the other functions.
+(Source from the Internet)
+
+## Here is the Normal Distribution Graph
+
+Quantile 55% has more precision,quantiles 5% and 95% have less precision.
+```{r}
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rnorm(200), quants)
+}
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+plot(L, xlab="pth quantile", ylab="Length", main="Length of the middle 95% of the sampling distribution", type = "l", axes =FALSE)
+
+axis(1, 1:length(quants), quants)
+axis(2)
+
+```
+
+## Here is the Density Graph for Normal Distribution
+
+The highest density is 0.4 for Median has the tightest sampling distribution. 
+```{r}
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rnorm(200), quants)
+}
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+plot(x=dnorm(qnorm(quants)),y=L, xlab="Density", ylab="Length", main="Length of the middle 95% of the sampling distribution by density", type = "l")
+
+```
+
+## What is Exponential Distribution?
+
+Definition: 
+The exponential distribution is a probability distribution that describes time between events in a Poisson point process, i.e., a process in which events occur continuously and independently at a constant average rate. 
+
+Background Information: 
+Dexp gives the density, pexp gives the distribution function, qexp gives the quantile function, and rexp generates random deviates.
+
+The length of the result is determined by n for rexp, and is the maximum of the lengths of the numerical arguments for the other functions.
+(Source from Internet)
+
+Here is the Exponential Distribution Graph
+
+Quantile 5% has more precision,quantile 95% has less precision.
+```{r}
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA, nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rexp(200), quants)
+}
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+plot(L, xlab="pth quantile", ylab="Length", main="Length of the middle 95% of the sampling distribution", type = "l", axes =FALSE)
+
+axis(1, 1:length(quants), quants)
+axis(2)
+```
+
+Here is the Density graph for Exponential Distribution 
+
+The highest density is 0.95 for Median has the tightest sampling distribution. 
+```{r}
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rexp(200), quants)
+}
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+plot(x=dexp(qexp(quants)),y=L, xlab="Density", ylab="Length", main="Length of the middle 95% of the sampling distribution by density", type = "l")
+```
+
+## What is Mixture Distribution?
+
+Definition: 
+A mixture distribution is a mixture of two or more probability distributions. Random variables are drawn from more than one parent population to create a new distribution. The parent populations can be univariate or multivariate, although the mixed distributions should have the same dimensionality. In addition, they should either be all discrete probability distributions or all continuous probability distributions.
+
+Background Information: 
+Dnorm gives the density, pnorm gives the distribution function, qnorm gives the quantile function, and rnorm generates random deviates.
+
+The length of the result is determined by n for rnorm, and is the maximum of the lengths of the numerical arguments for the other functions.
+(Source from the Internet)
+
+Here is the Mixture Distribution Graph I
+```{r}
+rf3 <- function(N){
+  G <- sample(0:2, N, replace = TRUE, prob = c(5,3,2))
+  (G==0)*rnorm(N) + (G==1)*rnorm(N,4) + (G==2)*rnorm(N,-4,2)
+}
+
+pf3 <- function(x){
+  .5*pnorm(x) + .3*pnorm(x,4) + .2*pnorm(x,-4,2)
+}
+
+df3 <- function(x){
+  .5*dnorm(x) + .3*dnorm(x,4) + .2*dnorm(x,-4,2)
+}
+
+
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rf3(200), quants)
+}
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+
+plot(L, xlab="pth quantile", ylab="Length", main="Length of the middle 95% of the sampling distribution", type = "l", axes =FALSE)
+
+axis(1, 1:length(quants), quants)
+axis(2)
+```
+
+Here is the Density Graph for Mixture Distribution I
+```{r}
+rf3 <- function(N){
+  G <- sample(0:2, N, replace = TRUE, prob = c(5,3,2))
+  (G==0)*rnorm(N) + (G==1)*rnorm(N,4) + (G==2)*rnorm(N,-4,2)
+}
+
+pf3 <- function(x){
+  .5*pnorm(x) + .3*pnorm(x,4) + .2*pnorm(x,-4,2)
+}
+
+df3 <- function(x){
+  .5*dnorm(x) + .3*dnorm(x,4) + .2*dnorm(x,-4,2)
+}
+
+
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rf3(200), quants)
+}
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+roots<-(1:length(quants))
+for(i in seq_along(roots)){
+  pfq<-function(q){
+  pf3(q)-quants[i]
+  }
+  roots[i]<-uniroot(pfq,c(-100,100))[[1]]
+}
+
+plot(x=df3(roots),y=L, xlab="Density", ylab="Length", main="Length of the middle 95% of the sampling distribution by density", type = "p")
+
+
+```
+
+Here is the Mixture Distribution Graph II
+```{r}
+rf4 <- function(N){
+  G <- sample(0:1, N, replace = TRUE)
+  (G==0)*rbeta(N,5,1) + (G==1)*rbeta(N,1,5)
+}
+
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rf4(200), quants)
+}
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+
+plot(L, xlab="pth quantile", ylab="Length", main="Length of the middle 95% of the sampling distribution", type = "l", axes =FALSE)
+
+axis(1, 1:length(quants), quants)
+axis(2)
+
+```
+
+Here is the Density Graph for Mixture Distribution II
+```{r}
+rf4 <- function(N){
+  G <- sample(0:1, N, replace = TRUE)
+  (G==0)*rbeta(N,5,1) + (G==1)*rbeta(N,1,5)
+}
+
+pf4 <- function(x){
+  .5*pbeta(x,5,1) + .5*pbeta(x,1,5)
+}
+
+df4 <- function(x){
+  .5*dbeta(x,5,1) + .5*dbeta(x,1,5)
+}
+
+quants<-seq(0.05, 0.95, 0.05)
+Sum_quantile <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile[j,] <- quantile(rf4(200), quants)
+}
+
+
+L<-(1:length(quants))
+for(i in seq_along(L)){
+  L[i]<-quantile(Sum_quantile[,i], 0.975)-quantile(Sum_quantile[,i], 0.025)
+}
+
+roots<-(1:length(quants))
+for(i in seq_along(roots)){
+  pfq<-function(q){
+  pf4(q)-quants[i]
+  }
+  roots[i]<-uniroot(pfq,c(-100,100))[[1]]
+}
+
+plot(x=df4(roots),y=L, xlab="Density", ylab="Length", main="Length of the middle 95% of the sampling distribution by density", type = "l")
+
+```
+
+```{r}
+quants1<-seq(0.05, 0.95, 0.05)
+Sum_quantile1 <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants1)))
+for(j in 1:5000){
+ Sum_quantile1[j,] <- quantile(rnorm(400), quants1)
+}
+
+L1<-(1:length(quants1))
+for(i in seq_along(L1)){
+  L1[i]<-quantile(Sum_quantile1[,i], 0.975)-quantile(Sum_quantile1[,i], 0.025)
+}
+
+quants2<-seq(0.05, 0.95, 0.05)
+Sum_quantile2 <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants2)))
+for(j in 1:5000){
+ Sum_quantile2[j,] <- quantile(rnorm(800), quants2)
+}
+
+L2<-(1:length(quants2))
+for(i in seq_along(L2)){
+  L2[i]<-quantile(Sum_quantile2[,i], 0.975)-quantile(Sum_quantile2[,i], 0.025)
+}
+
+quants3<-seq(0.05, 0.95, 0.05)
+Sum_quantile3 <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants3)))
+for(j in 1:5000){
+ Sum_quantile3[j,] <- quantile(rnorm(1600), quants3)
+}
+
+L3<-(1:length(quants3))
+for(i in seq_along(L3)){
+  L3[i]<-quantile(Sum_quantile3[,i], 0.975)-quantile(Sum_quantile3[,i], 0.025)
+}
+```
+
+
+```{r}
+plot(L1, xlab="pth quantile", ylab="Length", main="Length of the middle 95% of the sampling distribution", type = "l", ylim=c(0,0.4),axes =FALSE)
+lines(L2)
+lines(L3)
+
+axis(1, 1:length(quants), quants1)
+axis(2)
+
+```
+`
+
+```{r}
+quants1<-seq(0.05, 0.95, 0.05)
+Sum_quantile1 <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants1)))
+for(j in 1:5000){
+ Sum_quantile1[j,] <- quantile(rnorm(400), quants1)
+}
+
+L1<-(1:length(quants1))
+for(i in seq_along(L1)){
+  L1[i]<-quantile(Sum_quantile1[,i], 0.975)-quantile(Sum_quantile1[,i], 0.025)
+}
+
+quants2<-seq(0.05, 0.95, 0.05)
+Sum_quantile2 <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants)))
+for(j in 1:5000){
+ Sum_quantile2[j,] <- quantile(rnorm(800), quants2)
+}
+
+L2<-(1:length(quants2))
+for(i in seq_along(L2)){
+  L2[i]<-quantile(Sum_quantile2[,i], 0.975)-quantile(Sum_quantile2[,i], 0.025)
+}
+
+quants3<-seq(0.05, 0.95, 0.05)
+Sum_quantile3 <- data.frame(matrix(NA,nrow = 5000, ncol = length(quants3)))
+for(j in 1:5000){
+ Sum_quantile3[j,] <- quantile(rnorm(1600), quants3)
+}
+
+L3<-(1:length(quants3))
+for(i in seq_along(L3)){
+  L3[i]<-quantile(Sum_quantile3[,i], 0.975)-quantile(Sum_quantile3[,i], 0.025)
+}
+
+
+
+plot(x=dnorm(qnorm(quants1)),y=L1, xlab="Density", ylab="Length", main="Length of the middle 95% of the sampling distribution by density", type = "l", ylim=c(0,0.45))
+lines(x=dnorm(qnorm(quants2)),y=L2)
+lines(x=dnorm(qnorm(quants3)),y=L3)
+
+
+```
+
