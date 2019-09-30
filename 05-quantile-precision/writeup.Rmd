@@ -135,7 +135,7 @@ Dnorm gives the density, pnorm gives the distribution function, qnorm gives the 
 The length of the result is determined by n for rnorm, and is the maximum of the lengths of the numerical arguments for the other functions.
 (Source from the Internet)
 
-## Here is the Mixture Distribution Graph I
+## Here is the Mixture Distribution Graph I (Normal Distribution)
 
 Quantile 30% has more precision,quantile 17% has less precision.
 ```{r}
@@ -171,7 +171,7 @@ axis(1, 1:length(quants), quants)
 axis(2)
 ```
 
-## Here is the Density Graph for Mixture Distribution I
+## Here is the Density Graph for Mixture Distribution I (Normal Distribution)
 
 The highest density is 0.2 for median has the tightest sampling distribution. 
 ```{r}
@@ -213,7 +213,7 @@ plot(x=df3(roots),y=L, xlab="Density", ylab="Length", main="Length of the middle
 
 ```
 
-## Here is the Mixture Distribution Graph II
+## Here is the Mixture Distribution Graph II (Beta Distribution)
 
 Quantile 5% and 95% have more precision,quantile 50% has less precision.
 ```{r}
@@ -240,7 +240,7 @@ axis(1, 1:length(quants), quants)
 axis(2)
 ```
 
-## Here is the Density Graph for Mixture Distribution II
+## Here is the Density Graph for Mixture Distribution II (Beta Distribution)
 
 The highest density is 0.29 for median has the tightest sampling distribution. 
 ```{r}

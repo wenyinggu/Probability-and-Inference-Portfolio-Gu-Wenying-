@@ -1,0 +1,202 @@
+---
+title: "Invincible Braves"
+date: "9/8/2019"
+author: "Wenying Gu"
+output:
+  html_document:
+    code_folding: hide
+    theme: united 
+    highlight: tango
+    toc: yes
+    toc_depth: 6 
+    toc_float: true
+editor_options: 
+  chunk_output_type: inline
+---
+### Email: [wenying.gu@vanderbilt.edu]()
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache =  TRUE)
+```
+
+
+Q: Begin with the median from a sample of N=200 from the standard normal distribution. Write an R function that is the density function for the median in this sample. Note that the 100th order statistic is approximately the median, and use the order statistic formula discussed in class. Generate a plot of the function.
+
+```{r}
+N = 200
+median(rnorm(N, mean = 0, sd = 1))
+
+dorder <- function(x,k=100,n=N){
+  k*
+  choose(n,k)*
+  (pnorm(x, 0, 1))^(k-1)*
+  (1-pnorm(x, 0, 1))^(n-k)*
+  dnorm(x, 0, 1)
+}
+
+x <- seq(-5, 5, by = 0.01)
+plot(x, dorder(x), type = "l") # Density of the medians of the standard normal distribution
+lines(x,dnorm(x), col = "red") # Density of these values of a standard normal distribution
+lines(x, dorder(x, k = 50, n = 100), col = "blue")
+lines(x, dorder(x, k = 2, n = 3), col = "green")
+```
+
+Q: Write an R function that is the probability function for the median in this sample. Use the order statistic formula discussed in class. Generate a plot of the function.
+
+```{r}
+porder <- function(x, k = 100, n =N) {
+  pbinom(k-1, n, pnorm(x, 0, 1), lower.tail = FALSE)
+}
+
+# pbinom(100-1, 200, pnorm(0,0,1), lower.tail = FALSE)
+
+x <- seq(-3, 3, by = 0.01)
+plot(x, porder(x), type = "l") # Density of the medians of the standard normal distribution
+# lines(x,pnorm(x), col = "red") # Density of these values of a standard normal distribution
+# lines(x, porder(x, k = 50, n = 100), col = "blue")
+# lines(x, porder(x, k = 2, n = 3), col = "green")
+```
+
+
+Write an R function that is the quantile function for the median in this sample. (You have several options for how to write this function.) Generate a plot of the function.
+
+```{r}
+g <- function(x, pf, p) pf(x) - p
+qorder <- function(p) {
+  out <- p
+  for(i in seq_along(p)){
+    out[i] <- uniroot(g, c(-100, 100), pf = porder, p = p[i])$root
+  }
+  out
+}
+
+p <- seq(0.05, 0.95, by = 0.01)
+plot(p, qorder(p), type = "l")
+
+# pnorm(qnorm(0))
+# porder(qorder(0))
+# porder(qorder(0.5))
+```
+
+Q: Simulate the sampling distribution for the median as you did in the previous deliverable. Create a plot of the empirical CDF (ECDF). Overlay the plot of the ECDF with a plot of the CDF.
+
+```{r}
+# copy from the previous homework in week 5
+
+curve(dorder(x), -1, 1, lwd = 3, col = "blue")
+
+curve(porder(x), -1, 1, lwd = 3, col = "blue")
+
+meds <- c()
+for(i in 1:1000) {
+  meds[i] <- median(rnorm(N))
+}
+
+#meds2 <- qorder(runif(5000))
+
+#hist(qorder(meds2))
+
+#plot(ecdf(=(meds2)))
+plot(ecdf(meds), add = TRUE, col = "blue")
+curve(porder(x), add = TRUE, col = "red", lwd = 1)
+```
+
+Q: Using the simulated sampling distribution from the previous question, create a histogram (on the density scale). Overlay the histogram with a plot of the density function.
+
+```{r}
+hist(meds, freq = FALSE)
+curve(dorder(x), add = TRUE, col = "blue")
+```
+
+Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by ploting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.
+
+If sample and theoretical quantiles come from the same distribution, then the plotted points will fall along the line y=x, approximately. Here are two examples when the sample and theoretical quantiles came from the same distribution.
+
+```{r}
+random_sample <- rexp(200)
+q_candidate <- qexp
+
+x <- q_candidate((1:200)/200)
+y <- quantile(random_sample, probs = (1:200)/200)
+
+# svg("./assets/exponential-qq.svg", width = 5, height = 3)
+# tgsify::plotstyle(style = upright)
+plot(x,y, asp = 1)
+abline(0,1)
+# dev.off()
+```
+
+```{r}
+random_sample <- rnorm(200)
+q_candidate <- qnorm
+
+x <- q_candidate((1:200)/200)
+y <- quantile(random_sample, probs = (1:200)/200)
+
+# svg("./assets/normal-qq.svg", width = 5, height = 3)
+# tgsify::plotstyle(style = upright)
+plot(x,y, asp = 1, xlab = "Theoretical quantile", ylab = "Sample quantile")
+abline(0,1)
+# dev.off()
+```
+
+Here is an example when the sample distribution does not match with the theoretical distribution. The sample distribution is t3 where as the theoretical distribution is N(0, 1). Notice the deviation from y = x.
+
+```{r}
+random_sample <- rt(200, df = 3)
+q_candidate <- qnorm
+
+x <- q_candidate((1:200)/200)
+y <- quantile(random_sample, probs = (1:200)/200)
+
+# svg("./assets/t-normal-qq.svg", width = 5, height = 3)
+# tgsify::plotstyle(style = upright)
+plot(x,y, asp = 1, xlab = "Theoretical quantile", ylab = "Sample quantile")
+abline(0,1)
+# dev.off()
+```
+
+For the assigment, generate a QQ plot for the simulated data of the median relative to the known sampling distribution of the median.
+
+Does the simulated data agree with the theoretical sampling distribution?
+
+```{r}
+# plotting 1:N-1 when using qq plot!
+random_sample <- meds
+q_candidate <- qorder
+
+pp <- ppoints(N)
+
+x <- q_candidate(pp)
+y <- quantile(random_sample, probs = pp)
+
+# svg("./assets/normal-qq.svg", width = 5, height = 3)
+# tgsify::plotstyle(style = upright)
+plot(x,y, asp = 1, xlab = "Theoretical quantile", ylab = "Sample quantile")
+abline(0,1)
+# dev.off()
+```
+
+
+Q: Modify the dorder, porder, and qorder functions so that the functions take a new parameter k (for the kt**h order statistic) so that the functions will work for any order statistic and not just the median.
+
+```{r}
+# plotting 1:N-1 when using qq plot!
+random_sample <- meds
+q_candidate <- qorder
+
+x <- q_candidate((1:N)/N)
+y <- quantile(random_sample, probs = (1:N)/N)
+
+# svg("./assets/normal-qq.svg", width = 5, height = 3)
+# tgsify::plotstyle(style = upright)
+plot(x[1:N-1],y[1:N-1], asp = 1, xlab = "Theoretical quantile", ylab = "Sample quantile")
+abline(0,1)
+# dev.off()
+```
+
+Q: Generate the QQ plot for simulated data from the sampling distribution of the sample max and the theoretical largest order statistic distribution.
+
+Q: Modify the dorder, porder, and qorder functions so that the functions take new parameters dist and ... so that the functions will work for any continuous distribution that has d and p functions defined in R.
+
+Q: Use the newly modified functions to plot the probability and density functions for the sample min (N=200).
