@@ -1,0 +1,120 @@
+---
+title: "08-coverage-probability"
+date: "10/15/2019"
+author: "Wenying Gu"
+output:
+  html_document:
+    code_folding: hide
+    theme: united 
+    highlight: tango
+    toc: yes
+    toc_depth: 6 
+    toc_float: true
+editor_options: 
+  chunk_output_type: inline
+---
+### Email: [wenying.gu@vanderbilt.edu]()
+
+## What is coverage probability?
+Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals.
+
+## Step 1
+
+Step: Generate a single sample from a standard normal distribution of size N = 200. Explain to the reader how you use MLE to estimate the distribution.
+
+```{r}
+require(stats4)
+parameters<-c(N=201, mean=0, sd=1)
+generate_data<-rnorm(N)
+construct_ci <- function(mean, sd){
+  fs <- dnorm(
+        x = generate_data
+      , mean = mean
+      , sd = sd
+      , log = TRUE
+    ) 
+  -sum(fs,na.rm = TRUE)
+}
+
+fit <- mle(
+    construct_ci
+  , start = list(mean = 0, sd = 1)
+  , method = "L-BFGS-B"
+  , lower = c(0, 0.01)
+)
+
+capture_param<-coef(fit)
+capture_param
+
+```
+
+## Step 2
+
+Step: Show the reader how you approximate the sampling distribution of the median, conditional on the estimate of the distribution in the previous step.
+
+```{r}
+median <- rep(NA, N)
+for(i in 1:N){
+  b <- rnorm(N, mean = stats4::coef(fit)[1], sd =stats4::coef(fit)[2] ) 
+  median[i]<-median(b)
+}
+median
+```
+
+## Step 3
+
+Step: Describe how you calculate a 95% confidence interval from the approximated sampling distribution.
+
+```{r}
+quantile95 <- quantile(median, c(0.025,0.975))
+quantile95
+```
+
+## Step 4
+
+Step: Explain the concept of coverage probability. Explain your code for calculating the coverage probability.
+
+```{r}
+N <- 201 # parameters
+pop.mean = 0
+pop.sd = 1
+
+parameters <- c(N, mean = pop.mean, sd = pop.sd)
+
+generate_data <- function(parameters) {
+  # Hard coded standard normal distribution
+  rnorm(parameters[1], parameters[2], parameters[3])
+}
+
+
+capture_median <- function(ci) {
+  # Hard coded 0 as parameter of interest
+  1*(ci[1] < 0 & 0 < ci[2])
+}
+
+
+mle.sd <- sqrt(((N-1)/N)*var(pop.sample))
+mle.mean <- mean(pop.sample)
+
+capture <- NA
+for(j in 1:200) {
+  out <- rep(NA, 200)
+  for(i in 1:200) {
+    Fhat.sample <- rnorm(N, mean = mle.mean, sd = mle.sd)
+    out[i] <- median(Fhat.sample)
+  }
+  gen.ci <- quantile(out, c(0.025, 0.975))
+  capture[j] <-(gen.ci[1] < pop.mean & gen.ci[2] > pop.mean)
+}
+round(mean(capture), 4)
+gen.ci
+```
+
+
+## Step 5
+
+Step: Perform the simulation and report the results.
+
+## Step 6 
+
+Step: Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.
