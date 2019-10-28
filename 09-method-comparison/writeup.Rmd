@@ -1,0 +1,84 @@
+---
+title: "09-method-comparison"
+date: "10/28/2019"
+author: "Wenying Gu"
+output:
+  html_document:
+    code_folding: hide
+    theme: united 
+    highlight: tango
+    toc: yes
+    toc_depth: 6 
+    toc_float: true
+editor_options: 
+  chunk_output_type: inline
+---
+### Email: [wenying.gu@vanderbilt.edu]()
+
+Simulation study
+Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals. (See the previous deliverable for definitions and examples.)
+
+Idealy, a 95% confidence interval will capture the population parameter of interest in 95% of samples. One can also calculate 80% or 90% confidence intervals. In general, an X% confidence interval should capture the population parameter of interest in X% of samples.
+
+Not all methods are equally good
+In this assignment, you will perform a 2 × 4 × 2 factorial simulation study to compare the coverage probability of various methods of calculating 90% confidence intervals. The three factors in the experiment are
+
+True, underlying distribution
+standard normal
+gamma(shape = 1.4, scale = 3)
+Model
+method of moments with normal
+method of moments with gamma
+kernel density estimation
+bootstrap
+Parameter of interest
+sample min (1st order statistic)
+median
+Other settings in the experiment that will not change are:
+
+Sample size, N = 201
+Outside the loop estimation
+You will write a blog post to explain your simulation study and results. The audience of your blog post is a Senior Data Scientist who you hope to work with in the future. Think about how you will communicate the results. Will you generate a table, a figure, or a table of figures?
+
+Generate a single sample from a standard normal distribution of size N = 201. Explain to the reader how you use MLE to estimate the distribution.
+```{r}
+N<-201
+require(stats4)
+parameters<-c(N=201, mean=0, sd=1)
+generate_data<-rnorm(201)
+construct_ci <- function(mean, sd){
+  fs <- dnorm(
+        x = generate_data
+      , mean = mean
+      , sd = sd
+      , log = TRUE
+    ) 
+  -sum(fs,na.rm = TRUE)
+}
+
+fit <- mle(
+    construct_ci
+  , start = list(mean = 0, sd = 1)
+  , method = "L-BFGS-B"
+  , lower = c(0, 0.01)
+)
+
+capture_param<-coef(fit)
+capture_param
+
+```
+
+
+```{r}
+median <- rep(NA, 201)
+for(i in 1:201){
+  b <- rnorm(201, mean = stats4::coef(fit)[1], sd =stats4::coef(fit)[2] ) 
+  median[i]<-median(b)
+}
+median
+```
+
+```{r}
+quantile95 <- quantile(median, c(0.025,0.975))
+quantile95
+```
