@@ -32,10 +32,10 @@ Here is one way to calculate the error, including absolute error and relative er
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
 p <- c(0.01, 0.05, 0.10, 0.25, 0.50) #probability 
 R <- 2^(2:15) #R
-phat<- matrix(NA,length(R),length(p)) #matrix is one way to do it, also try dataframes later.  
+abs_error<- matrix(NA,length(R),length(p)) #matrix is one way to do it, also try dataframes later.  
 for(i in 1: length(p)){
   for (j in 1:length(R)){
-    phat[j,i]<-rbinom(1,R[j],p[i])/R[j]
+    abs_error[j,i]<-mean(abs(rbinom(200,R[j],p[i])/R[j] - p[i]))
     
   }
 }
@@ -45,17 +45,15 @@ for(i in 1: length(p)){
 Absolute error 
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
-abs_error <- matrix(NA, length(R), length(p))
-for (i in 1: length(R)) {
-  abs_error[i,] <- abs(p-phat[i,])
-}
 
-plot(R,seq(0,.06,length.out= length(R)),type="n")
+
+plot(R,seq(0,.06,length.out= length(R)),type="n",xlab = "N", ylab = "Absolute Error")
 lines(R, abs_error[,1], col="red")
 lines(R, abs_error[,2], col="blue")
 lines(R, abs_error[,3], col="yellow")
 lines(R, abs_error[,4], col="green")
 lines(R, abs_error[,5], col="black")
+
 
 ```
 
@@ -69,7 +67,7 @@ for (i in 1: length(R)) {
   rel_error[i,] <- (abs_error[i,]/p)
 }
 
-plot(R,seq(0,.25,length.out= length(R)),type="n")
+plot(R,seq(0,.25,length.out= length(R)),type="n",xlab = "N", ylab = "Relative Error")
 lines(R, rel_error[,1], col="red")
 lines(R, rel_error[,2], col="blue")
 lines(R, rel_error[,3], col="yellow")
@@ -112,7 +110,7 @@ for(i in 1: nrow(ss1)){
 
 ss1$xlog2 <- log2(ss1$N)
 plot.new()
-plot.window(xlim=range(0, 15), ylim=range(ss1$mae)) #xlim=range(ss1$xlog2)
+plot(xlim=range(0, 15), ylim=range(ss1$mae)) #xlim=range(ss1$xlog2)
 l1<- ss1 %>% split(.$p)
 for(j in seq_along(l1)){
   lines(l1[[j]]$xlog2, l1[[j]]$mae, type="b", pch=16, col=j)
