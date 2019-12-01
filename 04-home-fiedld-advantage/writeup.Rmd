@@ -38,6 +38,7 @@ Game Location | No Advantage | Advantage
 ATL      |$\ P_{B}$| $\ P_{B}^H$=$\ P_{B}$*1.1
 NYC      |$\ P_{B}$| $\ P_{B}^A$=1-(1-$\ P_{B}$)*1.1
 
+# With/wihtout home advantage 
 Here is the probability without home field advantage that the Braves win the world series when $\ P_{B}$ =0.55.  
 
 ```{r}
@@ -90,32 +91,45 @@ apo[, sum(p), overall_outcome]
 ```
 The probability with home field advantage that Braves win the world series is 0.604
 
+In conclusion, the probability between with home advantage and without home field advantage are diffrent. Based on the assumption we made above, the probability without home field advantage that Braves win the world series is 0.608 which is greater than 0.604 the probability with home field advantage. The difference is 0.004. 
 
+
+# Simulation (with/without home advantage)
 Here is the probability without home field advantage that the Braves win the world series when $\ P_{B}$ =0.55 by simulation.
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
-
+set.seed(123)
 hfi <- c(0,0,1,1,1,0,0)
 pb <- 0.55
-j = 0
-Win_game <- rep(NA, 100000)
-for(i in seq_along(Win_game)){
-  Win_game[i] <- rbinom(7, 1, pb)
-  if (Win_game[i]>= 4){
-    j = j + 1
+game <- rep(NA, 100000)
+for(i in 1:100000){
+  result<- rep(NA,7)
+  for (j in 1:7){
+    result[j]<-rbinom(1,1,pb)
+    if (sum(result,na.rm = TRUE)==4){
+      game[i]="win"
+    break
   }
+  else if (length(which(result==0))==4){
+    game[i] = "lose"
+break
+}
+else
+next
+}
 }
 
-p_hat_without<- mean(Win_game)
+p_hat_without<-mean(game=="win")
 p_hat_without
 
 ```
-The probability without home field advantage that Braves win the world series by simulation is 0.551.
+The probability without home field advantage that Braves win the world series by simulation is 0.608.
 
 
 Here is the probability with home field advantage that the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC} and $\ P_{B}$ =0.55.  
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
+set.seed(1234)
 pb <- 0.55
 advantage_multiplier <- 1.1 
 pbh <- 0.55*advantage_multiplier
@@ -145,10 +159,12 @@ for(i in seq_along(Win_game)){
 p_hat_with<- mean(Win_game)
 p_hat_with
 ```
-The probability with home field advantage that Braves win the world series by simulation is 0.602.
+The probability with home field advantage that Braves win the world series by simulation is 0.605.
+
+Use two different if else conditions to deal with the simulation. In simulation, the probability without home field advantage that Braves win the world series by simulation is 0.608 while the probability with the home field advantage is 0.605. The difference of probability between them is 0.003 in simulation method. 
 
 
-What is the absolute and relative error for your simulation in the previous question?
+# Absolute and relative error for simulation 
 
 Here is the formula for absolute error and relative error
 

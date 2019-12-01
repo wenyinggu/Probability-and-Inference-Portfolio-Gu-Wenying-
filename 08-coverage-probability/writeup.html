@@ -1656,13 +1656,17 @@ div.tocify {
 <div id="email-wenying.guvanderbilt.edu" class="section level3">
 <h3>Email: <a href>wenying.gu@vanderbilt.edu</a></h3>
 </div>
-<div id="what-is-coverage-probability" class="section level2">
-<h2>What is coverage probability?</h2>
+<div id="what-is-coverage-probability" class="section level1">
+<h1>What is coverage probability?</h1>
 <p>Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals.</p>
 </div>
-<div id="step-1" class="section level2">
-<h2>Step 1</h2>
-<p>Step: Generate a single sample from a standard normal distribution of size N = 201. Explain to the reader how you use MLE to estimate the distribution.</p>
+<div id="aims-for-this-blog" class="section level1">
+<h1>Aims for This Blog</h1>
+<p>Generate a simulation to calculate the coverage probability of the 95% confidence interval of the median by using MLE method.</p>
+</div>
+<div id="generate-a-single-sample-data" class="section level1">
+<h1>Generate a single sample data</h1>
+<p>Generate a single sample from a standard normal distribution of size N = 201. Generating the data use rnorm and then construct the confidence interval.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">N&lt;-<span class="dv">201</span></a>
 <a class="sourceLine" id="cb1-2" title="2"><span class="kw">require</span>(stats4)</a></code></pre></div>
 <pre><code>## Loading required package: stats4</code></pre>
@@ -1676,82 +1680,40 @@ div.tocify {
 <a class="sourceLine" id="cb3-8" title="8">      , <span class="dt">log =</span> <span class="ot">TRUE</span></a>
 <a class="sourceLine" id="cb3-9" title="9">    ) </a>
 <a class="sourceLine" id="cb3-10" title="10">  <span class="op">-</span><span class="kw">sum</span>(fs,<span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-11" title="11">}</a>
-<a class="sourceLine" id="cb3-12" title="12"></a>
-<a class="sourceLine" id="cb3-13" title="13">fit &lt;-<span class="st"> </span><span class="kw">mle</span>(</a>
-<a class="sourceLine" id="cb3-14" title="14">    construct_ci</a>
-<a class="sourceLine" id="cb3-15" title="15">  , <span class="dt">start =</span> <span class="kw">list</span>(<span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb3-16" title="16">  , <span class="dt">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span></a>
-<a class="sourceLine" id="cb3-17" title="17">  , <span class="dt">lower =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.01</span>)</a>
-<a class="sourceLine" id="cb3-18" title="18">)</a>
-<a class="sourceLine" id="cb3-19" title="19"></a>
-<a class="sourceLine" id="cb3-20" title="20">capture_param&lt;-<span class="kw">coef</span>(fit)</a>
-<a class="sourceLine" id="cb3-21" title="21">capture_param</a></code></pre></div>
-<pre><code>##     mean       sd 
-## 0.000000 1.003265</code></pre>
+<a class="sourceLine" id="cb3-11" title="11">}</a></code></pre></div>
 </div>
-<div id="step-2" class="section level2">
-<h2>Step 2</h2>
-<p>Step: Show the reader how you approximate the sampling distribution of the median, conditional on the estimate of the distribution in the previous step.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">median &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">201</span>)</a>
-<a class="sourceLine" id="cb5-2" title="2"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">201</span>){</a>
-<a class="sourceLine" id="cb5-3" title="3">  b &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">201</span>, <span class="dt">mean =</span> stats4<span class="op">::</span><span class="kw">coef</span>(fit)[<span class="dv">1</span>], <span class="dt">sd =</span>stats4<span class="op">::</span><span class="kw">coef</span>(fit)[<span class="dv">2</span>] ) </a>
-<a class="sourceLine" id="cb5-4" title="4">  median[i]&lt;-<span class="kw">median</span>(b)</a>
-<a class="sourceLine" id="cb5-5" title="5">}</a>
-<a class="sourceLine" id="cb5-6" title="6">median</a></code></pre></div>
-<pre><code>##   [1]  0.015521464 -0.055550617  0.076063302  0.060506010  0.171522457
-##   [6] -0.112771809  0.032171214  0.043710998  0.089116547  0.112659854
-##  [11]  0.051765173  0.024656437 -0.016212859  0.165909867 -0.028656834
-##  [16] -0.129559154 -0.039303960  0.071619936 -0.163106417  0.127571758
-##  [21]  0.094497377  0.011760467 -0.100537656  0.117424860 -0.075462407
-##  [26] -0.034627904 -0.118798277  0.082724980 -0.074071337 -0.109171908
-##  [31]  0.031442912 -0.068564464  0.119590002 -0.046168512  0.235624049
-##  [36] -0.016005937  0.043920351  0.081833786 -0.027579585  0.041091189
-##  [41]  0.038601342  0.008757229  0.057828562 -0.065463979 -0.057944806
-##  [46] -0.083463814  0.031058777  0.058551177 -0.005559166 -0.012179849
-##  [51]  0.115209609 -0.105718621 -0.034940508 -0.068328110 -0.008093705
-##  [56]  0.210005555  0.080117716  0.011941029 -0.042206017  0.083752432
-##  [61]  0.002486624  0.024680611  0.047991841  0.113452353  0.087537254
-##  [66]  0.126488054  0.063757491  0.046735219  0.127779261 -0.053210498
-##  [71]  0.034386198 -0.038696135  0.040536088 -0.064817695  0.042473332
-##  [76] -0.053955710  0.182853197 -0.038764107 -0.033389101  0.043361808
-##  [81]  0.111575825  0.007491119  0.021748285  0.078152829 -0.162977947
-##  [86] -0.020760307  0.059996853 -0.039070324 -0.025576693  0.006472930
-##  [91]  0.042117553  0.036232048 -0.121504368 -0.130993089 -0.057477811
-##  [96] -0.142744611  0.049001106 -0.052010005  0.054643802 -0.031577095
-## [101] -0.088064577 -0.015729315  0.014799887  0.017407417  0.020413859
-## [106] -0.129145190 -0.085260841 -0.128278632 -0.039818432 -0.107215314
-## [111]  0.135861805 -0.227123209 -0.010299097 -0.152538188 -0.124229998
-## [116] -0.033742504 -0.048437998  0.073871171  0.039301937  0.028499978
-## [121]  0.108328504 -0.037321793  0.153622043 -0.030694600  0.005711857
-## [126]  0.009989265  0.226861227 -0.106357286 -0.055614923 -0.032584675
-## [131] -0.058963424 -0.117187696 -0.001095067 -0.026006121  0.103161773
-## [136]  0.010762609 -0.028654383  0.141405207  0.091068649  0.116903900
-## [141]  0.160913255  0.091420529 -0.089147550  0.113663791 -0.018108060
-## [146]  0.130109743 -0.037729966 -0.064141743  0.075707265 -0.105063870
-## [151] -0.074321821 -0.153185683 -0.014943196  0.084150103 -0.064044559
-## [156]  0.017262052 -0.039629343  0.044863962 -0.088924276  0.049305066
-## [161]  0.012906107 -0.055315315 -0.037829626 -0.089546839 -0.002288189
-## [166]  0.045084784 -0.020787070  0.075781890  0.080870867 -0.038450163
-## [171]  0.030553976  0.138862421  0.044309789  0.057573763 -0.007003771
-## [176]  0.035748153 -0.080429930  0.110524208  0.046389626 -0.137215006
-## [181]  0.037034076  0.090306558  0.005180583 -0.066184144  0.032087928
-## [186] -0.016428108 -0.128562088 -0.025652077  0.050189194 -0.087034228
-## [191] -0.109919039  0.118271473 -0.007770812  0.107610666 -0.037739324
-## [196]  0.135226543 -0.073378759  0.013439698 -0.119881453 -0.050532426
-## [201]  0.085365512</code></pre>
+<div id="use-mle-to-estimate-the-distribution" class="section level1">
+<h1>Use MLE to estimate the distribution</h1>
+<p>Estimating the sampling distribution of the single sample by using the MLE method from package stats4. Inputing the mean =0 and sd=1 to find the estimatie mean and sd by MLE method. Usually, the mean is around 0 and the sd is around 1.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">fit &lt;-<span class="st"> </span><span class="kw">mle</span>(</a>
+<a class="sourceLine" id="cb4-2" title="2">    construct_ci</a>
+<a class="sourceLine" id="cb4-3" title="3">  , <span class="dt">start =</span> <span class="kw">list</span>(<span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb4-4" title="4">  , <span class="dt">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span></a>
+<a class="sourceLine" id="cb4-5" title="5">  , <span class="dt">lower =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.01</span>)</a>
+<a class="sourceLine" id="cb4-6" title="6">)</a>
+<a class="sourceLine" id="cb4-7" title="7"></a>
+<a class="sourceLine" id="cb4-8" title="8">capture_param&lt;-<span class="kw">coef</span>(fit)</a>
+<a class="sourceLine" id="cb4-9" title="9">capture_param</a></code></pre></div>
+<pre><code>##       mean         sd 
+## 0.03052364 1.00364849</code></pre>
 </div>
-<div id="step-3" class="section level2">
-<h2>Step 3</h2>
-<p>Step: Describe how you calculate a 95% confidence interval from the approximated sampling distribution.</p>
+<div id="get-confidence-interval-for-the-median" class="section level1">
+<h1>Get confidence interval for the median</h1>
+<p>Set up a simulation to run the previous steps for 5000 times and get 5000 median. Using the quantile() to find the 95% confidence interval which is the true mean of 5000 median samples.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">median &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">5000</span>)</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5000</span>){</a>
+<a class="sourceLine" id="cb6-3" title="3">  b &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">201</span>, <span class="dt">mean =</span> stats4<span class="op">::</span><span class="kw">coef</span>(fit)[<span class="dv">1</span>], <span class="dt">sd =</span>stats4<span class="op">::</span><span class="kw">coef</span>(fit)[<span class="dv">2</span>] ) </a>
+<a class="sourceLine" id="cb6-4" title="4">  median[i]&lt;-<span class="kw">median</span>(b)</a>
+<a class="sourceLine" id="cb6-5" title="5">}</a></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">quantile95 &lt;-<span class="st"> </span><span class="kw">quantile</span>(median, <span class="kw">c</span>(<span class="fl">0.025</span>,<span class="fl">0.975</span>))</a>
 <a class="sourceLine" id="cb7-2" title="2">quantile95</a></code></pre></div>
 <pre><code>##       2.5%      97.5% 
-## -0.1427446  0.1659099</code></pre>
+## -0.1437103  0.2043120</code></pre>
 </div>
-<div id="step-4" class="section level2">
-<h2>Step 4</h2>
-<p>Step: Explain the concept of coverage probability. Explain your code for calculating the coverage probability.</p>
+<div id="capture-the-median" class="section level1">
+<h1>Capture the median</h1>
+<p>The sampling distribution of the median is likely to be normally distributed when the sample size ‘n’ is large. The median for standard normal distribution is 0. Therefore we want the know whether confidence interval capture the true median.</p>
+<p>True median: the lower confidence limit is less than zero and the upper confidence limit is greater than zero.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">N &lt;-<span class="st"> </span><span class="dv">201</span> <span class="co"># parameters</span></a>
 <a class="sourceLine" id="cb9-2" title="2">pop.mean =<span class="st"> </span><span class="dv">0</span></a>
 <a class="sourceLine" id="cb9-3" title="3">pop.sd =<span class="st"> </span><span class="dv">1</span></a>
@@ -1782,17 +1744,10 @@ div.tocify {
 <a class="sourceLine" id="cb9-28" title="28">  }</a>
 <a class="sourceLine" id="cb9-29" title="29">  gen.ci &lt;-<span class="st"> </span><span class="kw">quantile</span>(out, <span class="kw">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a>
 <a class="sourceLine" id="cb9-30" title="30">  capture[j] &lt;-(gen.ci[<span class="dv">1</span>] <span class="op">&lt;</span><span class="st"> </span>pop.mean <span class="op">&amp;</span><span class="st"> </span>gen.ci[<span class="dv">2</span>] <span class="op">&gt;</span><span class="st"> </span>pop.mean)</a>
-<a class="sourceLine" id="cb9-31" title="31">}</a>
-<a class="sourceLine" id="cb9-32" title="32"><span class="kw">round</span>(<span class="kw">mean</span>(capture), <span class="dv">4</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb9-31" title="31">}</a></code></pre></div>
+<p>#Estimate the coverage probability Coverage probability refers to the probability that capturing the true median. In the simulation, it will return 1 if the confidence interval capture the true median else will return 0. Therefore, take the mean of the returns can get the coverage probability. MLE is a good way to estimate the normal distribution, our covergae probability is around 1.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">round</span>(<span class="kw">mean</span>(capture), <span class="dv">4</span>)</a></code></pre></div>
 <pre><code>## [1] 1</code></pre>
-</div>
-<div id="step-5" class="section level2">
-<h2>Step 5</h2>
-<p>Step: Perform the simulation and report the results.</p>
-</div>
-<div id="step-6" class="section level2">
-<h2>Step 6</h2>
-<p>Step: Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.</p>
 </div>
 
 

@@ -1655,89 +1655,53 @@ div.tocify {
 
 <div id="email-wenying.guvanderbilt.edu" class="section level3">
 <h3>Email: <a href>wenying.gu@vanderbilt.edu</a></h3>
-<p>Simulation study Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals. (See the previous deliverable for definitions and examples.)</p>
+</div>
+<div id="simulation-study" class="section level1">
+<h1>Simulation study</h1>
+<p>Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals. (See the previous deliverable for definitions and examples.)</p>
 <p>Idealy, a 95% confidence interval will capture the population parameter of interest in 95% of samples. One can also calculate 80% or 90% confidence intervals. In general, an X% confidence interval should capture the population parameter of interest in X% of samples.</p>
-<p>Not all methods are equally good In this assignment, you will perform a 2 × 4 × 2 factorial simulation study to compare the coverage probability of various methods of calculating 90% confidence intervals. The three factors in the experiment are</p>
-<p>True, underlying distribution standard normal gamma(shape = 1.4, scale = 3) Model method of moments with normal method of moments with gamma kernel density estimation bootstrap Parameter of interest sample min (1st order statistic) median Other settings in the experiment that will not change are:</p>
-<p>Sample size, N = 201 Outside the loop estimation You will write a blog post to explain your simulation study and results. The audience of your blog post is a Senior Data Scientist who you hope to work with in the future. Think about how you will communicate the results. Will you generate a table, a figure, or a table of figures?</p>
+</div>
+<div id="not-all-methods-are-equally-good" class="section level1">
+<h1>Not all methods are equally good</h1>
+<p>In this assignment, you will perform a 2 × 4 × 2 factorial simulation study to compare the coverage probability of various methods of calculating 90% confidence intervals. The three factors in the experiment are</p>
+<p>1.True, underlying distribution</p>
+<ul>
+<li>standard normal</li>
+<li>gamma(shape = 1.4, scale = 3)</li>
+</ul>
+<p>2.Model</p>
+<ul>
+<li>method of moments with normal</li>
+<li>method of moments with gamma</li>
+<li>kernel density estimation</li>
+<li>bootstrap</li>
+</ul>
+<p>3.Parameter of interest</p>
+<ul>
+<li>sample min (1st order statistic)</li>
+<li>median</li>
+</ul>
+<p>Other settings in the experiment that will not change are:</p>
+<ul>
+<li>Sample size, N = 201</li>
+<li>Outside the loop estimation</li>
+</ul>
 <p>Generate a single sample from a standard normal distribution of size N = 201. Explain to the reader how you use MLE to estimate the distribution.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">N&lt;-<span class="dv">201</span></a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw">require</span>(stats4)</a></code></pre></div>
-<pre><code>## Loading required package: stats4</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">parameters&lt;-<span class="kw">c</span>(<span class="dt">N=</span><span class="dv">201</span>, <span class="dt">mean=</span><span class="dv">0</span>, <span class="dt">sd=</span><span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb3-2" title="2">generate_data&lt;-<span class="kw">rnorm</span>(<span class="dv">201</span>)</a>
-<a class="sourceLine" id="cb3-3" title="3">construct_ci &lt;-<span class="st"> </span><span class="cf">function</span>(mean, sd){</a>
-<a class="sourceLine" id="cb3-4" title="4">  fs &lt;-<span class="st"> </span><span class="kw">dnorm</span>(</a>
-<a class="sourceLine" id="cb3-5" title="5">        <span class="dt">x =</span> generate_data</a>
-<a class="sourceLine" id="cb3-6" title="6">      , <span class="dt">mean =</span> mean</a>
-<a class="sourceLine" id="cb3-7" title="7">      , <span class="dt">sd =</span> sd</a>
-<a class="sourceLine" id="cb3-8" title="8">      , <span class="dt">log =</span> <span class="ot">TRUE</span></a>
-<a class="sourceLine" id="cb3-9" title="9">    ) </a>
-<a class="sourceLine" id="cb3-10" title="10">  <span class="op">-</span><span class="kw">sum</span>(fs,<span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-11" title="11">}</a>
-<a class="sourceLine" id="cb3-12" title="12"></a>
-<a class="sourceLine" id="cb3-13" title="13">fit &lt;-<span class="st"> </span><span class="kw">mle</span>(</a>
-<a class="sourceLine" id="cb3-14" title="14">    construct_ci</a>
-<a class="sourceLine" id="cb3-15" title="15">  , <span class="dt">start =</span> <span class="kw">list</span>(<span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb3-16" title="16">  , <span class="dt">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span></a>
-<a class="sourceLine" id="cb3-17" title="17">  , <span class="dt">lower =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.01</span>)</a>
-<a class="sourceLine" id="cb3-18" title="18">)</a>
-<a class="sourceLine" id="cb3-19" title="19"></a>
-<a class="sourceLine" id="cb3-20" title="20">capture_param&lt;-<span class="kw">coef</span>(fit)</a>
-<a class="sourceLine" id="cb3-21" title="21">capture_param</a></code></pre></div>
-<pre><code>##       mean         sd 
-## 0.09250557 1.00703517</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">median &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">201</span>)</a>
-<a class="sourceLine" id="cb5-2" title="2"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">201</span>){</a>
-<a class="sourceLine" id="cb5-3" title="3">  b &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">201</span>, <span class="dt">mean =</span> stats4<span class="op">::</span><span class="kw">coef</span>(fit)[<span class="dv">1</span>], <span class="dt">sd =</span>stats4<span class="op">::</span><span class="kw">coef</span>(fit)[<span class="dv">2</span>] ) </a>
-<a class="sourceLine" id="cb5-4" title="4">  median[i]&lt;-<span class="kw">median</span>(b)</a>
-<a class="sourceLine" id="cb5-5" title="5">}</a>
-<a class="sourceLine" id="cb5-6" title="6">median</a></code></pre></div>
-<pre><code>##   [1]  0.0795197102  0.0131809794  0.1389708259  0.1994633196  0.1428450231
-##   [6] -0.0251678237  0.1585043566  0.2154508145  0.0960272678 -0.0306168291
-##  [11]  0.1124760254  0.1451625209  0.1835664816  0.0069763116  0.0574970852
-##  [16]  0.1277514620  0.0237832221  0.0986830786  0.0969235248  0.0595489011
-##  [21]  0.2563877977  0.1534558047  0.0010319313  0.0312900459  0.1883714910
-##  [26]  0.0035362767  0.0931348441  0.0156003899  0.0758580313  0.0886486760
-##  [31]  0.0521341076  0.0351132577  0.0771326927  0.0243805092 -0.0120774548
-##  [36]  0.1830782578  0.1350214839  0.1569060405  0.2874289178  0.1978746797
-##  [41]  0.1355331453  0.1359721311  0.0531773965  0.1716886990  0.1686759300
-##  [46]  0.0928615220  0.0943580156  0.2130176940  0.1662439177  0.1787670072
-##  [51]  0.0497388706 -0.0433512264 -0.0216776746  0.0520235983  0.0761168985
-##  [56]  0.0600022536 -0.0143678611  0.0442333385 -0.0601305917  0.1103854224
-##  [61]  0.0356168724  0.1723880534  0.0944317162  0.1218154471  0.1749058719
-##  [66] -0.0239750060  0.0234482525  0.1701959331  0.1364483202  0.1658775570
-##  [71]  0.1845420872  0.0210070073  0.1208766376  0.1442174747  0.1473935351
-##  [76]  0.1750803131  0.2428191769  0.0414892514  0.0861770667  0.1750274610
-##  [81]  0.2956517665 -0.1138946439  0.1290091019  0.0474096031  0.0656324581
-##  [86]  0.0318825889  0.1645440069  0.0807630262  0.0678315493  0.0128176044
-##  [91]  0.1824800930  0.0726166405 -0.0078755069  0.1558604455  0.0983122714
-##  [96] -0.0102787851  0.1302128571  0.0791829181 -0.0720427897  0.1605316793
-## [101]  0.0512778031  0.1529956796 -0.0743379727  0.0860500243  0.2333259221
-## [106]  0.0882906035  0.0476721996  0.1594337113  0.0672395928  0.2160665387
-## [111]  0.0331704301  0.0915613589  0.0600164875 -0.0511786010  0.1005097542
-## [116]  0.0371417960  0.1847422037  0.0902679607  0.0838547181  0.1197242802
-## [121] -0.0651462714  0.0164747082  0.1135347075  0.1547224557  0.1437782504
-## [126]  0.1488195743  0.1328198960  0.0582478648  0.2201399892  0.0816927511
-## [131]  0.0953387254  0.1259589768 -0.0760098825  0.0313481179  0.0301307638
-## [136]  0.1445708726  0.0247608302  0.1014835724  0.1222545022 -0.0096063036
-## [141]  0.1288623513  0.0908741104  0.2375452148  0.1599387909  0.0505319559
-## [146]  0.0467416535  0.2499016328  0.0413805458  0.0437469363  0.0890272323
-## [151]  0.1066882189  0.0170390833  0.1958604348  0.0624094910 -0.0006099612
-## [156]  0.0388760982  0.2474809661  0.0568983100 -0.0052115416  0.0758958867
-## [161]  0.0799532698  0.1102374223  0.0787872475  0.1662023401  0.1191441769
-## [166]  0.0429123470  0.1565007763  0.0377350240  0.0874107772  0.0513328016
-## [171]  0.2662025304  0.1184207548  0.1872288757  0.1875020354  0.1158926863
-## [176]  0.0801919589  0.1802524912  0.0805967237  0.0896757651  0.0778410385
-## [181]  0.0504871797 -0.0803530908  0.1244262491 -0.0745355257  0.2372144580
-## [186]  0.0289126363  0.0806028619  0.0219632583  0.1795541243 -0.0406371842
-## [191]  0.0773666123  0.1216751647  0.1130708914  0.2900591154  0.0118695141
-## [196]  0.1161546292  0.1182219448  0.1442933848 -0.0448589556 -0.0732989555
-## [201]  0.1841327764</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">quantile95 &lt;-<span class="st"> </span><span class="kw">quantile</span>(median, <span class="kw">c</span>(<span class="fl">0.025</span>,<span class="fl">0.975</span>))</a>
-<a class="sourceLine" id="cb7-2" title="2">quantile95</a></code></pre></div>
-<pre><code>##        2.5%       97.5% 
-## -0.07329896  0.24990163</code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(dplyr)</a></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">require</span>(foreach)</a></code></pre></div>
+<pre><code>## Loading required package: foreach</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">require</span>(doParallel)</a></code></pre></div>
+<pre><code>## Loading required package: doParallel</code></pre>
+<pre><code>## Loading required package: iterators</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
 </div>
 
 

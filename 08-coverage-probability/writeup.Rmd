@@ -15,17 +15,19 @@ editor_options:
 ---
 ### Email: [wenying.gu@vanderbilt.edu]()
 
-## What is coverage probability?
+# What is coverage probability?
 Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals.
 
-## Step 1
+# Aims for This Blog 
+Generate a simulation to calculate the coverage probability of the 95% confidence interval of the median by using MLE method. 
 
-Step: Generate a single sample from a standard normal distribution of size N = 200. Explain to the reader how you use MLE to estimate the distribution.
-
+# Generate a single sample data 
+Generate a single sample from a standard normal distribution of size N = 201. Generating the data use rnorm and then construct the confidence interval. 
 ```{r}
+N<-201
 require(stats4)
 parameters<-c(N=201, mean=0, sd=1)
-generate_data<-rnorm(N)
+generate_data<-rnorm(201)
 construct_ci <- function(mean, sd){
   fs <- dnorm(
         x = generate_data
@@ -35,6 +37,13 @@ construct_ci <- function(mean, sd){
     ) 
   -sum(fs,na.rm = TRUE)
 }
+
+```
+
+# Use MLE to estimate the distribution 
+Estimating the sampling distribution of the single sample by using the MLE method from package stats4. Inputing the mean =0 and sd=1 to find the estimatie mean and sd by MLE method. Usually, the mean is around 0 and the sd is around 1. 
+
+```{r}
 
 fit <- mle(
     construct_ci
@@ -48,31 +57,28 @@ capture_param
 
 ```
 
-## Step 2
-
-Step: Show the reader how you approximate the sampling distribution of the median, conditional on the estimate of the distribution in the previous step.
-
+# Get confidence interval for the median 
+Set up a simulation to run the previous steps for 5000 times and get 5000 median. Using the quantile() to find the 95% confidence interval which is the true mean of 5000 median samples.  
 ```{r}
-median <- rep(NA, N)
-for(i in 1:N){
-  b <- rnorm(N, mean = stats4::coef(fit)[1], sd =stats4::coef(fit)[2] ) 
+median <- rep(NA, 5000)
+for(i in 1:5000){
+  b <- rnorm(201, mean = stats4::coef(fit)[1], sd =stats4::coef(fit)[2] ) 
   median[i]<-median(b)
 }
-median
+
 ```
 
-## Step 3
-
-Step: Describe how you calculate a 95% confidence interval from the approximated sampling distribution.
 
 ```{r}
 quantile95 <- quantile(median, c(0.025,0.975))
 quantile95
 ```
 
-## Step 4
+# Capture the median 
+The sampling distribution of the median is likely to be normally distributed when the sample size 'n' is large. The median for standard normal distribution is 0. Therefore we want the know whether confidence interval capture the true median. 
 
-Step: Explain the concept of coverage probability. Explain your code for calculating the coverage probability.
+True median: the lower confidence limit is less than zero and the upper confidence limit is greater than zero.
+
 
 ```{r}
 N <- 201 # parameters
@@ -92,29 +98,26 @@ capture_median <- function(ci) {
   1*(ci[1] < 0 & 0 < ci[2])
 }
 
-
+pop.sample<-rnorm(N,0,1)
 mle.sd <- sqrt(((N-1)/N)*var(pop.sample))
 mle.mean <- mean(pop.sample)
 
 capture <- NA
-for(j in 1:200) {
-  out <- rep(NA, 200)
-  for(i in 1:200) {
+for(j in 1:1000) {
+  out <- rep(NA, 1000)
+  for(i in 1:1000) {
     Fhat.sample <- rnorm(N, mean = mle.mean, sd = mle.sd)
     out[i] <- median(Fhat.sample)
   }
   gen.ci <- quantile(out, c(0.025, 0.975))
   capture[j] <-(gen.ci[1] < pop.mean & gen.ci[2] > pop.mean)
 }
-round(mean(capture), 4)
-gen.ci
+
 ```
 
+#Estimate the coverage probability 
+Coverage probability refers to the probability that capturing the true median. In the simulation, it will return 1 if the confidence interval capture the true median else will return 0. Therefore, take the mean of the returns can get the coverage probability. MLE is a good way to estimate the normal distribution, our covergae probability is around 1. 
+```{r}
+round(mean(capture), 4)
+```
 
-## Step 5
-
-Step: Perform the simulation and report the results.
-
-## Step 6 
-
-Step: Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.

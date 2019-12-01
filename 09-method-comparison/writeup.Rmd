@@ -1,5 +1,5 @@
 ---
-title: "09-method-comparison"
+title: "method-comparison"
 date: "10/28/2019"
 author: "Wenying Gu"
 output:
@@ -15,70 +15,182 @@ editor_options:
 ---
 ### Email: [wenying.gu@vanderbilt.edu]()
 
-Simulation study
+# Simulation study
 Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals. (See the previous deliverable for definitions and examples.)
 
 Idealy, a 95% confidence interval will capture the population parameter of interest in 95% of samples. One can also calculate 80% or 90% confidence intervals. In general, an X% confidence interval should capture the population parameter of interest in X% of samples.
 
-Not all methods are equally good
-In this assignment, you will perform a 2 × 4 × 2 factorial simulation study to compare the coverage probability of various methods of calculating 90% confidence intervals. The three factors in the experiment are
+# Aim for this blog 
+This blog will perform a 2 × 4 × 2 factorial simulation study to compare the coverage probability of various methods of calculating 90% confidence intervals. The three factors in the experiment are
 
-True, underlying distribution
-standard normal
-gamma(shape = 1.4, scale = 3)
-Model
-method of moments with normal
-method of moments with gamma
-kernel density estimation
-bootstrap
-Parameter of interest
-sample min (1st order statistic)
-median
+1.True, underlying distribution
+
+* standard normal
+* gamma(shape = 1.4, scale = 3)
+
+2.Model
+
+* method of moments with normal
+* method of moments with gamma
+* kernel density estimation
+* bootstrap
+
+3.Parameter of interest
+
+* sample min (1st order statistic)
+* median
+
 Other settings in the experiment that will not change are:
 
-Sample size, N = 201
-Outside the loop estimation
-You will write a blog post to explain your simulation study and results. The audience of your blog post is a Senior Data Scientist who you hope to work with in the future. Think about how you will communicate the results. Will you generate a table, a figure, or a table of figures?
+* Sample size, N = 201
+* Outside the loop estimation
 
-Generate a single sample from a standard normal distribution of size N = 201. Explain to the reader how you use MLE to estimate the distribution.
-```{r}
-N<-201
-require(stats4)
-parameters<-c(N=201, mean=0, sd=1)
-generate_data<-rnorm(201)
-construct_ci <- function(mean, sd){
-  fs <- dnorm(
-        x = generate_data
-      , mean = mean
-      , sd = sd
-      , log = TRUE
+# Library 
+```{r cache=TRUE,message=FALSE, warning=FALSE}
+library(dplyr)
+require(foreach)
+require(doParallel)
+```
+
+# Generate data 
+Write a function to generate data from standard normal distribution and gamma distribution of size N = 201. Generating the data use rnorm(N) and rgamma(N,shape,scale).
+
+1.True, underlying distribution
+
+* standard normal
+* gamma(shape = 1.4, scale = 3)
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
+
+generate_data <- function(N, dist, sh, sc) {
+  if (dist == "norm") {
+    rnorm(N)
+  } else if (dist == "gamma") {
+    rgamma(N, shape = sh, scale = sc)
+  }
+}
+
+```
+
+# Use Different Methods to Estimate the distribution 
+Build a model to estimate 90% confidence interval for the distribution min/median, the model will contain 4 methods, including method of moments with normal; method of moments with gamma; kernel density estimation and bootstrap. 
+
+2.Model
+
+* method of moments with normal
+* method of moments with gamma
+* kernel density estimation
+* bootstrap
+
+3.Parameter of interest
+
+* sample min (1st order statistic)
+* median
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
+
+estimate.ci <- function(data, mod, par.int, R = 10, smoo = 0.3) {
+  N<- length(data)
+  sum.measure <- get(paste0("par.int1",dist1))
+  
+  if (mod == "MMnorm") {
+    mm.mean <- mean(data)
+    mm.sd <- sd(data)
+    sim.data <- array(rnorm(length(data)*R), dim = c(N, R))
+    samp.dist <- apply(sim.data, 2, FUN = sum.measure)
+    return(quantile(samp.dist, c(0.05, 0.95)))
+    
+  } else if (mod == "MMgamma") {
+    
+    mm.shape <- mean(data)^2 / var(data)
+    mm.scale <- var(data) / mean(data)
+    sim.data <- array(rgamma(length(data)*R, shape = mm.shape, scale = mm.scale), dim = c(N, R))
+    samp.dist <- apply(sim.data, 2, FUN = sum.measure)
+    return(quantile(samp.dist, c(0.05, 0.95)))
+    
+  } else if (mod == "KDE") {
+    
+    ecdfstar <- function(t, data, smooth = smoo) {
+      outer(t, data, function(a,b){pnorm(a, b, smooth)}) %>% rowMeans
+    }
+    
+    tbl <- data.frame(
+      x = seq(min(data)-sd(data), max(data)+sd(data), by = 0.01)
     ) 
-  -sum(fs,na.rm = TRUE)
+    
+    tbl$p <- ecdfstar(tbl$x, data, smoo) 
+    tbl <- tbl[!duplicated(tbl$p), ]
+    
+    qkde <- function(ps, tbl){
+      rows <- cut(ps, tbl$p, labels = FALSE) 
+      tbl[rows, "x"]
+    }
+    
+    U <- runif(N*R)
+    sim.data <- array(qkde(U, tbl), dim = c(N, R))
+    samp.dist <- apply(sim.data, 2, FUN = sum.measure)
+    return(quantile(samp.dist, c(0.05, 0.95)))
+    
+  } else if (mod == "Boot") {
+  
+    sim.data <- array(sample(data, N*R, replace = TRUE), dim = c(N, R))
+    samp.dist <- apply(sim.data, 2, FUN = sum.measure)
+    return(quantile(samp.dist, c(0.05, 0.95)))
+  }
 }
 
-fit <- mle(
-    construct_ci
-  , start = list(mean = 0, sd = 1)
-  , method = "L-BFGS-B"
-  , lower = c(0, 0.01)
-)
-
-capture_param<-coef(fit)
-capture_param
 
 ```
 
+# Capture the min/median 
+If the sample size is large enough, our min/median will close to the theoretical value. Therefore we want the know whether confidence interval capture the theoretical value(true min/median). 
 
-```{r}
-median <- rep(NA, 201)
-for(i in 1:201){
-  b <- rnorm(201, mean = stats4::coef(fit)[1], sd =stats4::coef(fit)[2] ) 
-  median[i]<-median(b)
+Capture parameter: the lower confidence limit is less than true parameter and the upper confidence limit is greater than true parameter.
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
+capture_par <- function(ci, true.par) {
+  1 * (ci[1] < true.par & true.par < ci[2])
 }
-median
 ```
 
-```{r}
-quantile95 <- quantile(median, c(0.025,0.975))
-quantile95
+
+#Estimate the coverage probability 
+Coverage probability refers to the probability that capturing the true min/median. In the simulation, it will return 1 if the confidence interval capture the true min/median else will return 0. Therefore, take the mean of the returns can get the coverage probability. 
+
+```{r cache=TRUE,message=FALSE, warning=FALSE}
+N <- 201
+shape.set <- 1.4
+scale.set <- 3
+
+true.norm.med <- qnorm(0.5)
+true.norm.min <- mean(apply(array(rnorm(N*10000), dim = c(N, 10000)), 2, min))
+true.gamma.med <- qgamma(0.5, shape = shape.set, scale = scale.set)
+true.gamma.min <- mean(apply(array(rgamma(N*10000, shape = shape.set, scale = scale.set), dim = c(N, 10000)), 2, min))
+
+
+
+simsettings <- expand.grid(dist = c("norm", "gamma"), model = c("MMnorm", "MMgamma", "KDE", "Boot"), par.int = c("median", "min"), cov.prob = NA, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
+
+for (k in 1: nrow(simsettings)) {
+  dist1 <- simsettings[k, 1]
+  model1 <- simsettings[k, 2]
+  par.int1 <- simsettings[k, 3]
+  
+  if(dist1=="norm" & par.int1=="median"){
+    true.par1 = true.norm.med+4
+  }else if(dist1=="norm" & par.int1=="min"){
+    true.par1 = true.norm.min+4
+  }else if(dist1=="gamma" & par.int1=="median"){
+    true.par1 = true.gamma.med
+  }else if(dist1=="gamma" & par.int1=="min"){
+    true.par1 = true.gamma.min
+  }
+
+cover <- NA
+for (sims in 1:10) {
+  cover[sims] <- generate_data (N, dist1,1.4,3)%>% estimate.ci(mod = model1, par.int = par.int1, R=10,smoo = 0.3) %>% capture_par(true.par = true.par1)
+}
+simsettings[k,4] <- mean(cover)
+}
 ```
+

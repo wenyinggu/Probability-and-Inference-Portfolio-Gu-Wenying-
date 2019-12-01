@@ -1294,7 +1294,7 @@ window.initializeCodeFolding = function(show) {
 
     // create a collapsable div to wrap the code in
     var div = $('<div class="collapse r-code-collapse"></div>');
-    if (show)
+    if (show || $(this)[0].classList.contains('fold-show'))
       div.addClass('in');
     var id = 'rcode-643E0F36' + currentIndex++;
     div.attr('id', id);
@@ -1475,7 +1475,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -1730,6 +1729,9 @@ div.tocify {
 </tr>
 </tbody>
 </table>
+</div>
+<div id="withwihtout-home-advantage" class="section level1">
+<h1>With/wihtout home advantage</h1>
 <p>Here is the probability without home field advantage that the Braves win the world series when <span class="math inline">\(\ P_{B}\)</span> =0.55.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">pbinom</span>(<span class="dv">3</span>,<span class="dv">7</span>,<span class="fl">0.45</span>)</a></code></pre></div>
 <pre><code>## [1] 0.6082878</code></pre>
@@ -1779,54 +1781,72 @@ div.tocify {
 ## 1:               W 0.604221
 ## 2:               L 0.395779</code></pre>
 <p>The probability with home field advantage that Braves win the world series is 0.604</p>
+<p>In conclusion, the probability between with home advantage and without home field advantage are diffrent. Based on the assumption we made above, the probability without home field advantage that Braves win the world series is 0.608 which is greater than 0.604 the probability with home field advantage. The difference is 0.004.</p>
+</div>
+<div id="simulation-withwithout-home-advantage" class="section level1">
+<h1>Simulation (with/without home advantage)</h1>
 <p>Here is the probability without home field advantage that the Braves win the world series when <span class="math inline">\(\ P_{B}\)</span> =0.55 by simulation.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">hfi &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb9-2" title="2">pb &lt;-<span class="st"> </span><span class="fl">0.55</span></a>
-<a class="sourceLine" id="cb9-3" title="3">j =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb9-4" title="4">Win_game &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">100000</span>)</a>
-<a class="sourceLine" id="cb9-5" title="5"><span class="cf">for</span>(i <span class="cf">in</span> <span class="kw">seq_along</span>(Win_game)){</a>
-<a class="sourceLine" id="cb9-6" title="6">  Win_game[i] &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">7</span>, <span class="dv">1</span>, pb)</a>
-<a class="sourceLine" id="cb9-7" title="7">  <span class="cf">if</span> (Win_game[i]<span class="op">&gt;=</span><span class="st"> </span><span class="dv">4</span>){</a>
-<a class="sourceLine" id="cb9-8" title="8">    j =<span class="st"> </span>j <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb9-9" title="9">  }</a>
-<a class="sourceLine" id="cb9-10" title="10">}</a>
-<a class="sourceLine" id="cb9-11" title="11"></a>
-<a class="sourceLine" id="cb9-12" title="12">p_hat_without&lt;-<span class="st"> </span><span class="kw">mean</span>(Win_game)</a>
-<a class="sourceLine" id="cb9-13" title="13">p_hat_without</a></code></pre></div>
-<pre><code>## [1] 0.55095</code></pre>
-<p>The probability without home field advantage that Braves win the world series by simulation is 0.551.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
+<a class="sourceLine" id="cb9-2" title="2">hfi &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb9-3" title="3">pb &lt;-<span class="st"> </span><span class="fl">0.55</span></a>
+<a class="sourceLine" id="cb9-4" title="4">game &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">100000</span>)</a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">100000</span>){</a>
+<a class="sourceLine" id="cb9-6" title="6">  result&lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>,<span class="dv">7</span>)</a>
+<a class="sourceLine" id="cb9-7" title="7">  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">7</span>){</a>
+<a class="sourceLine" id="cb9-8" title="8">    result[j]&lt;-<span class="kw">rbinom</span>(<span class="dv">1</span>,<span class="dv">1</span>,pb)</a>
+<a class="sourceLine" id="cb9-9" title="9">    <span class="cf">if</span> (<span class="kw">sum</span>(result,<span class="dt">na.rm =</span> <span class="ot">TRUE</span>)<span class="op">==</span><span class="dv">4</span>){</a>
+<a class="sourceLine" id="cb9-10" title="10">      game[i]=<span class="st">&quot;win&quot;</span></a>
+<a class="sourceLine" id="cb9-11" title="11">    <span class="cf">break</span></a>
+<a class="sourceLine" id="cb9-12" title="12">  }</a>
+<a class="sourceLine" id="cb9-13" title="13">  <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">length</span>(<span class="kw">which</span>(result<span class="op">==</span><span class="dv">0</span>))<span class="op">==</span><span class="dv">4</span>){</a>
+<a class="sourceLine" id="cb9-14" title="14">    game[i] =<span class="st"> &quot;lose&quot;</span></a>
+<a class="sourceLine" id="cb9-15" title="15"><span class="cf">break</span></a>
+<a class="sourceLine" id="cb9-16" title="16">}</a>
+<a class="sourceLine" id="cb9-17" title="17"><span class="cf">else</span></a>
+<a class="sourceLine" id="cb9-18" title="18"><span class="cf">next</span></a>
+<a class="sourceLine" id="cb9-19" title="19">}</a>
+<a class="sourceLine" id="cb9-20" title="20">}</a>
+<a class="sourceLine" id="cb9-21" title="21"></a>
+<a class="sourceLine" id="cb9-22" title="22">p_hat_without&lt;-<span class="kw">mean</span>(game<span class="op">==</span><span class="st">&quot;win&quot;</span>)</a>
+<a class="sourceLine" id="cb9-23" title="23">p_hat_without</a></code></pre></div>
+<pre><code>## [1] 0.60834</code></pre>
+<p>The probability without home field advantage that Braves win the world series by simulation is 0.608.</p>
 <p>Here is the probability with home field advantage that the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC} and <span class="math inline">\(\ P_{B}\)</span> =0.55.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">pb &lt;-<span class="st"> </span><span class="fl">0.55</span></a>
-<a class="sourceLine" id="cb11-2" title="2">advantage_multiplier &lt;-<span class="st"> </span><span class="fl">1.1</span> </a>
-<a class="sourceLine" id="cb11-3" title="3">pbh &lt;-<span class="st"> </span><span class="fl">0.55</span><span class="op">*</span>advantage_multiplier</a>
-<a class="sourceLine" id="cb11-4" title="4">pba &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="fl">0.55</span>)<span class="op">*</span>advantage_multiplier</a>
-<a class="sourceLine" id="cb11-5" title="5">hfi &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb11-6" title="6"></a>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">set.seed</span>(<span class="dv">1234</span>)</a>
+<a class="sourceLine" id="cb11-2" title="2">pb &lt;-<span class="st"> </span><span class="fl">0.55</span></a>
+<a class="sourceLine" id="cb11-3" title="3">advantage_multiplier &lt;-<span class="st"> </span><span class="fl">1.1</span> </a>
+<a class="sourceLine" id="cb11-4" title="4">pbh &lt;-<span class="st"> </span><span class="fl">0.55</span><span class="op">*</span>advantage_multiplier</a>
+<a class="sourceLine" id="cb11-5" title="5">pba &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="fl">0.55</span>)<span class="op">*</span>advantage_multiplier</a>
+<a class="sourceLine" id="cb11-6" title="6">hfi &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>)</a>
 <a class="sourceLine" id="cb11-7" title="7"></a>
 <a class="sourceLine" id="cb11-8" title="8"></a>
 <a class="sourceLine" id="cb11-9" title="9"></a>
-<a class="sourceLine" id="cb11-10" title="10">j =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb11-11" title="11">Win_game &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">100000</span>)</a>
-<a class="sourceLine" id="cb11-12" title="12">round &lt;-<span class="st"> </span>hfi</a>
-<a class="sourceLine" id="cb11-13" title="13"><span class="cf">for</span>(i <span class="cf">in</span> <span class="kw">seq_along</span>(Win_game)){</a>
-<a class="sourceLine" id="cb11-14" title="14">  <span class="cf">for</span> (k <span class="cf">in</span> <span class="kw">seq_along</span>(hfi)){</a>
-<a class="sourceLine" id="cb11-15" title="15">    p_win&lt;-<span class="kw">ifelse</span>(hfi[k],pbh,pba)</a>
-<a class="sourceLine" id="cb11-16" title="16">    round[k]&lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">1</span>,<span class="dv">1</span>,p_win)</a>
-<a class="sourceLine" id="cb11-17" title="17">  }</a>
-<a class="sourceLine" id="cb11-18" title="18">  <span class="co">#Win_game[i]</span></a>
-<a class="sourceLine" id="cb11-19" title="19">  <span class="cf">if</span> (<span class="kw">sum</span>(round)<span class="op">&gt;=</span><span class="dv">4</span>){</a>
-<a class="sourceLine" id="cb11-20" title="20">    Win_game[i] &lt;-<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb11-21" title="21">  }</a>
-<a class="sourceLine" id="cb11-22" title="22">  <span class="cf">else</span>{</a>
-<a class="sourceLine" id="cb11-23" title="23">    Win_game[i] &lt;-<span class="st"> </span><span class="dv">0</span> </a>
-<a class="sourceLine" id="cb11-24" title="24"> }</a>
-<a class="sourceLine" id="cb11-25" title="25">}</a>
-<a class="sourceLine" id="cb11-26" title="26"></a>
-<a class="sourceLine" id="cb11-27" title="27">p_hat_with&lt;-<span class="st"> </span><span class="kw">mean</span>(Win_game)</a>
-<a class="sourceLine" id="cb11-28" title="28">p_hat_with</a></code></pre></div>
-<pre><code>## [1] 0.60376</code></pre>
-<p>The probability with home field advantage that Braves win the world series by simulation is 0.602.</p>
-<p>What is the absolute and relative error for your simulation in the previous question?</p>
+<a class="sourceLine" id="cb11-10" title="10"></a>
+<a class="sourceLine" id="cb11-11" title="11">j =<span class="st"> </span><span class="dv">0</span></a>
+<a class="sourceLine" id="cb11-12" title="12">Win_game &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">100000</span>)</a>
+<a class="sourceLine" id="cb11-13" title="13">round &lt;-<span class="st"> </span>hfi</a>
+<a class="sourceLine" id="cb11-14" title="14"><span class="cf">for</span>(i <span class="cf">in</span> <span class="kw">seq_along</span>(Win_game)){</a>
+<a class="sourceLine" id="cb11-15" title="15">  <span class="cf">for</span> (k <span class="cf">in</span> <span class="kw">seq_along</span>(hfi)){</a>
+<a class="sourceLine" id="cb11-16" title="16">    p_win&lt;-<span class="kw">ifelse</span>(hfi[k],pbh,pba)</a>
+<a class="sourceLine" id="cb11-17" title="17">    round[k]&lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">1</span>,<span class="dv">1</span>,p_win)</a>
+<a class="sourceLine" id="cb11-18" title="18">  }</a>
+<a class="sourceLine" id="cb11-19" title="19">  <span class="co">#Win_game[i]</span></a>
+<a class="sourceLine" id="cb11-20" title="20">  <span class="cf">if</span> (<span class="kw">sum</span>(round)<span class="op">&gt;=</span><span class="dv">4</span>){</a>
+<a class="sourceLine" id="cb11-21" title="21">    Win_game[i] &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb11-22" title="22">  }</a>
+<a class="sourceLine" id="cb11-23" title="23">  <span class="cf">else</span>{</a>
+<a class="sourceLine" id="cb11-24" title="24">    Win_game[i] &lt;-<span class="st"> </span><span class="dv">0</span> </a>
+<a class="sourceLine" id="cb11-25" title="25"> }</a>
+<a class="sourceLine" id="cb11-26" title="26">}</a>
+<a class="sourceLine" id="cb11-27" title="27"></a>
+<a class="sourceLine" id="cb11-28" title="28">p_hat_with&lt;-<span class="st"> </span><span class="kw">mean</span>(Win_game)</a>
+<a class="sourceLine" id="cb11-29" title="29">p_hat_with</a></code></pre></div>
+<pre><code>## [1] 0.60463</code></pre>
+<p>The probability with home field advantage that Braves win the world series by simulation is 0.605.</p>
+<p>Use two different if else conditions to deal with the simulation. In simulation, the probability without home field advantage that Braves win the world series by simulation is 0.608 while the probability with the home field advantage is 0.605. The difference of probability between them is 0.003 in simulation method.</p>
+</div>
+<div id="absolute-and-relative-error-for-simulation" class="section level1">
+<h1>Absolute and relative error for simulation</h1>
 <p>Here is the formula for absolute error and relative error</p>
 <p>absolute error = |p̂−p|</p>
 <p>and</p>
@@ -1838,13 +1858,13 @@ div.tocify {
 <a class="sourceLine" id="cb13-5" title="5">abs_error_with&lt;-<span class="st"> </span><span class="kw">abs</span>(pb_with<span class="op">-</span>p_hat_with)</a>
 <a class="sourceLine" id="cb13-6" title="6">rel_error_with&lt;-<span class="st"> </span><span class="kw">abs</span>(pb_with<span class="op">-</span>p_hat_with)<span class="op">/</span>pb_with</a>
 <a class="sourceLine" id="cb13-7" title="7">abs_error_without</a></code></pre></div>
-<pre><code>## [1] 0.0573378</code></pre>
+<pre><code>## [1] 5.22e-05</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">rel_error_without</a></code></pre></div>
-<pre><code>## [1] 0.09426097</code></pre>
+<pre><code>## [1] 8.581464e-05</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">abs_error_with</a></code></pre></div>
-<pre><code>## [1] 0.000461</code></pre>
+<pre><code>## [1] 0.000409</code></pre>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">rel_error_with</a></code></pre></div>
-<pre><code>## [1] 0.0007629659</code></pre>
+<pre><code>## [1] 0.0006769046</code></pre>
 <p>The absolute error without home field advantage is 0.057 The relative error without home field advantage is 0.094 The absolute error with home field advantage is 0.002 The relative error with home field advantage is 0.003</p>
 </div>
 

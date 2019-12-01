@@ -1,3 +1,4 @@
+---
 title: "Simulation study: CLT"
 date: "11/12/2019"
 author: "Wenying Gu"
@@ -15,6 +16,9 @@ editor_options:
 ### Email: [wenying.gu@vanderbilt.edu]()
 
 # Background Information: Cenral Limit Theorem 
+
+The Central Limit Theorem states that the sampling distribution of the sample means approaches a normal distribution as the sample size gets larger — no matter what the shape of the population distribution. This fact holds especially true for sample sizes over 30. All this is saying is that as you take more samples, especially large ones, your graph of the sample means will look more like a normal distribution.(source from Internet)
+
 The central limit theorem is an important computational short-cut for generating and making inference from the sampling distribution of the mean. You’ll recall that the central limit theorem short-cut relies on a number of conditions, specifically:
 
 * Independent observations
@@ -24,43 +28,32 @@ The central limit theorem is an important computational short-cut for generating
 
 # Load Packages 
 Here is the packages magrittr and sn that we will use in this deliverable.
-```{r}
+```{r,message=FALSE}
 require(magrittr)
 #install.packages("sn")
 require(sn)
 ```
 
 
-```{r}
-slant <- c(0,2,10,100)
-loc <- 0
-sc <- 1
-
-r <- 5000
-N <- c(5, 10, 20, 40)
-```
-
 # Parameters that do not change
+Based on the conditions I'd like to introduce some parameters listed below
 
-```{r}
-R<- 5000
-location <-0
-scale<-1
-```
+* R=5000 
+* location=0
+* scale=1
 
 # Parameters that change
 
+* N= c(5,10,20,40)
+* slant= c(0,2,10,100)
+* delta= slant/(sqrt(1+slant^2))
+
+
+# Funtions to generate qqplot 
+Input different slant and different N into the function 
 ```{r}
-N <- c(5,10,20,40)
-slant <- c(0,2,10,100)
-delta<-slant/(sqrt(1+slant^2))
-```
-
-
-# Quantites to calculate/generate
-
-```{r}
-generate_qqplot<-function(R, location, scale, N, slant, delta){
+generate_qqplot<-function(R=5000, location=0, scale=1, N, slant){
+  delta<-slant/(sqrt(1+slant^2))
   pop_mean <- 
   location+scale*delta*(sqrt(2/pi))
   pop_sd <- 
@@ -77,13 +70,33 @@ generate_qqplot<-function(R, location, scale, N, slant, delta){
   sample_dist_sim <-apply(random.skew,1,mean)
   
   qqplot(sample_dist_sim, 
-       sample_dist_clt, asp = 1)
+       sample_dist_clt, asp = 1,main="qq plot")
        abline(0,1)
 }
 
 ```
-`
 
+# Generate skew normal distributions and CLT estimation 
+To put so many plots into one graph, there is no space to label the axis. 
+On the left of graph, I listed the skew normal distribution based on different slants(0,2,10,100). The x-axis is skew normal distribution, the y-axis is density. On the right of graph (qqplot), the CLT estimation comply with simulation of skew normal distribution. 
+When we increse the simple size N, the estimation of CLT fits skew normal distribution better. Therefore, according to the central limit theorm, when slant=0, we get normal distribution and siample size N as large as possible, the CLT estimation will be more precise.
+```{r}
+
+N= c(5,10,20,40)
+slant= c(0,2,10,100)
+delta= slant/(sqrt(1+slant^2))
+
+x<-seq(-5,5,0.05)
+
+par(mfrow = c(4,5), mar=c(3,2,2,2))
+for(i in slant){
+  plot(dsn(x, xi=0, omega=1, alpha = i),type="l",main="Distribution")
+  for(j in N){
+    generate_qqplot(slant = i, N = j)
+  }
+}
+
+```
 
 
 
