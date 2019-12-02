@@ -91,7 +91,8 @@ Build a model to estimate 90% confidence interval for the distribution min/media
 
 estimate.ci <- function(data, mod, par.int, R = 10, smoo = 0.3) {
   N<- length(data)
-  sum.measure <- get(paste0("par.int1",dist1))
+  sum.measure <- get(par.int1)
+
   
   if (mod == "MMnorm") {
     mm.mean <- mean(data)
@@ -105,6 +106,7 @@ estimate.ci <- function(data, mod, par.int, R = 10, smoo = 0.3) {
     mm.shape <- mean(data)^2 / var(data)
     mm.scale <- var(data) / mean(data)
     sim.data <- array(rgamma(length(data)*R, shape = mm.shape, scale = mm.scale), dim = c(N, R))
+    browser()
     samp.dist <- apply(sim.data, 2, FUN = sum.measure)
     return(quantile(samp.dist, c(0.05, 0.95)))
     
@@ -171,6 +173,7 @@ true.gamma.min <- mean(apply(array(rgamma(N*10000, shape = shape.set, scale = sc
 
 simsettings <- expand.grid(dist = c("norm", "gamma"), model = c("MMnorm", "MMgamma", "KDE", "Boot"), par.int = c("median", "min"), cov.prob = NA, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
 
+
 for (k in 1: nrow(simsettings)) {
   dist1 <- simsettings[k, 1]
   model1 <- simsettings[k, 2]
@@ -186,11 +189,20 @@ for (k in 1: nrow(simsettings)) {
     true.par1 = true.gamma.min
   }
 
-cover <- NA
-for (sims in 1:10) {
-  cover[sims] <- generate_data (N, dist1,1.4,3)%>% estimate.ci(mod = model1, par.int = par.int1, R=10,smoo = 0.3) %>% capture_par(true.par = true.par1)
+#cover <- NA
+#for (sims in 1:10) {
+  #cover[sims] <- generate_data (N, dist1,1.4,3)%>% estimate.ci(mod = model1, par.int = par.int1, R=10,smoo = 0.3) %>% capture_par(true.par = true.par1)
 }
-simsettings[k,4] <- mean(cover)
-}
+#simsettings[k,4] <- mean(cover)
+#}
 ```
 
+# Conclusion
+The combination model doesn't work since the gamma distribution can not contain negative scale. Here is the shape and scale value under MMgamma function.
+
+*Browse[1]> mm.shape
+*[1] 2.914494e-07
+*Browse[1]> mm.scale
+*[1] -1895.302
+
+We can add the value to "shape" to make it positive and the function will work. 

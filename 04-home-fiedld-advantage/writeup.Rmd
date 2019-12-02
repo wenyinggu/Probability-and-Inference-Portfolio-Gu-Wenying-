@@ -191,3 +191,6 @@ The relative error without home field advantage is 0.094
 The absolute error with home field advantage is 0.002
 The relative error with home field advantage is 0.003
 
+# Conlusion 
+
+* When we are calculating probability in real life, it is not always equal likely as theoretical assumption. For example, in real life we should computer the home advantage to close to the true probability. When your simulation is large enough the error will be small. 
