@@ -85,13 +85,14 @@ pop.mean = 0
 pop.sd= 1
 
 
-pop.sample<-rnorm(N,0,1)
-mle.sd <- sqrt(((N-1)/N)*var(pop.sample))
-mle.mean <- mean(pop.sample)
 
 capture <- NA
 for(j in 1:1000) {
   out <- rep(NA, 1000)
+   N<-201
+    pop.sample<-rnorm(N,0,1)
+    mle.sd <- sqrt(((N-1)/N)*var(pop.sample))
+    mle.mean <- mean(pop.sample)
   for(i in 1:1000) {
     Fhat.sample <- rnorm(N, mean = mle.mean, sd = mle.sd)
     out[i] <- median(Fhat.sample)
