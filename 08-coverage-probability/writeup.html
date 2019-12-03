@@ -1695,7 +1695,7 @@ div.tocify {
 <a class="sourceLine" id="cb4-8" title="8">capture_param&lt;-<span class="kw">coef</span>(fit)</a>
 <a class="sourceLine" id="cb4-9" title="9">capture_param</a></code></pre></div>
 <pre><code>##       mean         sd 
-## 0.03052364 1.00364849</code></pre>
+## 0.07904857 0.96128992</code></pre>
 </div>
 <div id="get-confidence-interval-for-the-median" class="section level1">
 <h1>Get confidence interval for the median</h1>
@@ -1707,44 +1707,32 @@ div.tocify {
 <a class="sourceLine" id="cb6-5" title="5">}</a></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">quantile95 &lt;-<span class="st"> </span><span class="kw">quantile</span>(median, <span class="kw">c</span>(<span class="fl">0.025</span>,<span class="fl">0.975</span>))</a>
 <a class="sourceLine" id="cb7-2" title="2">quantile95</a></code></pre></div>
-<pre><code>##       2.5%      97.5% 
-## -0.1437103  0.2043120</code></pre>
+<pre><code>##        2.5%       97.5% 
+## -0.08844441  0.24559547</code></pre>
 </div>
 <div id="capture-the-median" class="section level1">
 <h1>Capture the median</h1>
 <p>The sampling distribution of the median is likely to be normally distributed when the sample size ‘n’ is large. The median for standard normal distribution is 0. Therefore we want the know whether confidence interval capture the true median.</p>
 <p>True median: the lower confidence limit is less than zero and the upper confidence limit is greater than zero.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">N &lt;-<span class="st"> </span><span class="dv">201</span> <span class="co"># parameters</span></a>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">N &lt;-<span class="st"> </span><span class="dv">201</span> </a>
 <a class="sourceLine" id="cb9-2" title="2">pop.mean =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb9-3" title="3">pop.sd =<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-3" title="3">pop.sd=<span class="st"> </span><span class="dv">1</span></a>
 <a class="sourceLine" id="cb9-4" title="4"></a>
-<a class="sourceLine" id="cb9-5" title="5">parameters &lt;-<span class="st"> </span><span class="kw">c</span>(N, <span class="dt">mean =</span> pop.mean, <span class="dt">sd =</span> pop.sd)</a>
-<a class="sourceLine" id="cb9-6" title="6"></a>
-<a class="sourceLine" id="cb9-7" title="7">generate_data &lt;-<span class="st"> </span><span class="cf">function</span>(parameters) {</a>
-<a class="sourceLine" id="cb9-8" title="8">  <span class="co"># Hard coded standard normal distribution</span></a>
-<a class="sourceLine" id="cb9-9" title="9">  <span class="kw">rnorm</span>(parameters[<span class="dv">1</span>], parameters[<span class="dv">2</span>], parameters[<span class="dv">3</span>])</a>
-<a class="sourceLine" id="cb9-10" title="10">}</a>
-<a class="sourceLine" id="cb9-11" title="11"></a>
-<a class="sourceLine" id="cb9-12" title="12"></a>
-<a class="sourceLine" id="cb9-13" title="13">capture_median &lt;-<span class="st"> </span><span class="cf">function</span>(ci) {</a>
-<a class="sourceLine" id="cb9-14" title="14">  <span class="co"># Hard coded 0 as parameter of interest</span></a>
-<a class="sourceLine" id="cb9-15" title="15">  <span class="dv">1</span><span class="op">*</span>(ci[<span class="dv">1</span>] <span class="op">&lt;</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span><span class="dv">0</span> <span class="op">&lt;</span><span class="st"> </span>ci[<span class="dv">2</span>])</a>
-<a class="sourceLine" id="cb9-16" title="16">}</a>
-<a class="sourceLine" id="cb9-17" title="17"></a>
-<a class="sourceLine" id="cb9-18" title="18">pop.sample&lt;-<span class="kw">rnorm</span>(N,<span class="dv">0</span>,<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb9-19" title="19">mle.sd &lt;-<span class="st"> </span><span class="kw">sqrt</span>(((N<span class="dv">-1</span>)<span class="op">/</span>N)<span class="op">*</span><span class="kw">var</span>(pop.sample))</a>
-<a class="sourceLine" id="cb9-20" title="20">mle.mean &lt;-<span class="st"> </span><span class="kw">mean</span>(pop.sample)</a>
-<a class="sourceLine" id="cb9-21" title="21"></a>
-<a class="sourceLine" id="cb9-22" title="22">capture &lt;-<span class="st"> </span><span class="ot">NA</span></a>
-<a class="sourceLine" id="cb9-23" title="23"><span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>) {</a>
-<a class="sourceLine" id="cb9-24" title="24">  out &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">1000</span>)</a>
-<a class="sourceLine" id="cb9-25" title="25">  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>) {</a>
-<a class="sourceLine" id="cb9-26" title="26">    Fhat.sample &lt;-<span class="st"> </span><span class="kw">rnorm</span>(N, <span class="dt">mean =</span> mle.mean, <span class="dt">sd =</span> mle.sd)</a>
-<a class="sourceLine" id="cb9-27" title="27">    out[i] &lt;-<span class="st"> </span><span class="kw">median</span>(Fhat.sample)</a>
-<a class="sourceLine" id="cb9-28" title="28">  }</a>
-<a class="sourceLine" id="cb9-29" title="29">  gen.ci &lt;-<span class="st"> </span><span class="kw">quantile</span>(out, <span class="kw">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a>
-<a class="sourceLine" id="cb9-30" title="30">  capture[j] &lt;-(gen.ci[<span class="dv">1</span>] <span class="op">&lt;</span><span class="st"> </span>pop.mean <span class="op">&amp;</span><span class="st"> </span>gen.ci[<span class="dv">2</span>] <span class="op">&gt;</span><span class="st"> </span>pop.mean)</a>
-<a class="sourceLine" id="cb9-31" title="31">}</a></code></pre></div>
+<a class="sourceLine" id="cb9-5" title="5"></a>
+<a class="sourceLine" id="cb9-6" title="6">pop.sample&lt;-<span class="kw">rnorm</span>(N,<span class="dv">0</span>,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb9-7" title="7">mle.sd &lt;-<span class="st"> </span><span class="kw">sqrt</span>(((N<span class="dv">-1</span>)<span class="op">/</span>N)<span class="op">*</span><span class="kw">var</span>(pop.sample))</a>
+<a class="sourceLine" id="cb9-8" title="8">mle.mean &lt;-<span class="st"> </span><span class="kw">mean</span>(pop.sample)</a>
+<a class="sourceLine" id="cb9-9" title="9"></a>
+<a class="sourceLine" id="cb9-10" title="10">capture &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb9-11" title="11"><span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>) {</a>
+<a class="sourceLine" id="cb9-12" title="12">  out &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">1000</span>)</a>
+<a class="sourceLine" id="cb9-13" title="13">  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>) {</a>
+<a class="sourceLine" id="cb9-14" title="14">    Fhat.sample &lt;-<span class="st"> </span><span class="kw">rnorm</span>(N, <span class="dt">mean =</span> mle.mean, <span class="dt">sd =</span> mle.sd)</a>
+<a class="sourceLine" id="cb9-15" title="15">    out[i] &lt;-<span class="st"> </span><span class="kw">median</span>(Fhat.sample)</a>
+<a class="sourceLine" id="cb9-16" title="16">  }</a>
+<a class="sourceLine" id="cb9-17" title="17">  gen.ci &lt;-<span class="st"> </span><span class="kw">quantile</span>(out, <span class="kw">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a>
+<a class="sourceLine" id="cb9-18" title="18">  capture[j] &lt;-(gen.ci[<span class="dv">1</span>] <span class="op">&lt;</span><span class="st"> </span>pop.mean <span class="op">&amp;</span><span class="st"> </span>gen.ci[<span class="dv">2</span>] <span class="op">&gt;</span><span class="st"> </span>pop.mean)</a>
+<a class="sourceLine" id="cb9-19" title="19">}</a></code></pre></div>
 <p>#Estimate the coverage probability Coverage probability refers to the probability that capturing the true median. In the simulation, it will return 1 if the confidence interval capture the true median else will return 0. Therefore, take the mean of the returns can get the coverage probability. MLE is a good way to estimate the normal distribution, our covergae probability is around 1.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">round</span>(<span class="kw">mean</span>(capture), <span class="dv">4</span>)</a></code></pre></div>
 <pre><code>## [1] 1</code></pre>

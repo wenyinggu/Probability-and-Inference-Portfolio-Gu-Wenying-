@@ -79,24 +79,11 @@ The sampling distribution of the median is likely to be normally distributed whe
 
 True median: the lower confidence limit is less than zero and the upper confidence limit is greater than zero.
 
-
 ```{r}
-N <- 201 # parameters
+N <- 201 
 pop.mean = 0
-pop.sd = 1
+pop.sd= 1
 
-parameters <- c(N, mean = pop.mean, sd = pop.sd)
-
-generate_data <- function(parameters) {
-  # Hard coded standard normal distribution
-  rnorm(parameters[1], parameters[2], parameters[3])
-}
-
-
-capture_median <- function(ci) {
-  # Hard coded 0 as parameter of interest
-  1*(ci[1] < 0 & 0 < ci[2])
-}
 
 pop.sample<-rnorm(N,0,1)
 mle.sd <- sqrt(((N-1)/N)*var(pop.sample))
