@@ -216,5 +216,4 @@ Acoording to the probability graph and density graph the minimum is around -2.8
 # Conlusion 
 
 * In statistics, the kth order statistic of a statistical sample is equal to its kth-smallest value. 
-* The probability function is very close to binomial distribution
 * QQ plot is used to check the precision of sample quantile with theoretical quantile.
