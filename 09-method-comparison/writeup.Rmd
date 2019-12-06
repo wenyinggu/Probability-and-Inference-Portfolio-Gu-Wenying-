@@ -89,7 +89,7 @@ Build a model to estimate 90% confidence interval for the distribution min/media
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
 
-estimate.ci <- function(data, mod, par.int, R = 10, smoo = 0.3) {
+estimate.ci <- function(data, mod, par.int, R = 500, smoo = 0.3) {
   N<- length(data)
   sum.measure <- get(par.int1)
 
@@ -106,7 +106,6 @@ estimate.ci <- function(data, mod, par.int, R = 10, smoo = 0.3) {
     mm.shape <- mean(data)^2 / var(data)
     mm.scale <- var(data) / mean(data)
     sim.data <- array(rgamma(length(data)*R, shape = mm.shape, scale = mm.scale), dim = c(N, R))
-    browser()
     samp.dist <- apply(sim.data, 2, FUN = sum.measure)
     return(quantile(samp.dist, c(0.05, 0.95)))
     
@@ -131,7 +130,7 @@ estimate.ci <- function(data, mod, par.int, R = 10, smoo = 0.3) {
     U <- runif(N*R)
     sim.data <- array(qkde(U, tbl), dim = c(N, R))
     samp.dist <- apply(sim.data, 2, FUN = sum.measure)
-    return(quantile(samp.dist, c(0.05, 0.95)))
+    return(quantile(samp.dist, c(0.05, 0.95), na.rm = TRUE))
     
   } else if (mod == "Boot") {
   
@@ -156,7 +155,7 @@ capture_par <- function(ci, true.par) {
 ```
 
 
-#Estimate the coverage probability 
+# Estimate the coverage probability 
 Coverage probability refers to the probability that capturing the true min/median. In the simulation, it will return 1 if the confidence interval capture the true min/median else will return 0. Therefore, take the mean of the returns can get the coverage probability. 
 
 ```{r cache=TRUE,message=FALSE, warning=FALSE}
@@ -173,28 +172,35 @@ true.gamma.min <- mean(apply(array(rgamma(N*10000, shape = shape.set, scale = sc
 
 simsettings <- expand.grid(dist = c("norm", "gamma"), model = c("MMnorm", "MMgamma", "KDE", "Boot"), par.int = c("median", "min"), cov.prob = NA, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
 
+```
 
-for (k in 1: nrow(simsettings)) {
+```{r message=FALSE}
+library(dplyr)
+
+for (k in c(1:2, 4:10,12:16)) {
   dist1 <- simsettings[k, 1]
   model1 <- simsettings[k, 2]
   par.int1 <- simsettings[k, 3]
   
   if(dist1=="norm" & par.int1=="median"){
-    true.par1 = true.norm.med+4
+    true.par1 = true.norm.med
   }else if(dist1=="norm" & par.int1=="min"){
-    true.par1 = true.norm.min+4
+    true.par1 = true.norm.min
   }else if(dist1=="gamma" & par.int1=="median"){
     true.par1 = true.gamma.med
   }else if(dist1=="gamma" & par.int1=="min"){
     true.par1 = true.gamma.min
   }
 
-#cover <- NA
-#for (sims in 1:10) {
-  #cover[sims] <- generate_data (N, dist1,1.4,3)%>% estimate.ci(mod = model1, par.int = par.int1, R=10,smoo = 0.3) %>% capture_par(true.par = true.par1)
+cover <- NA
+for (sims in 1:500) {
+  cover[sims] <- generate_data (N, dist1,1.4,3)%>% estimate.ci(mod = model1, par.int = par.int1, R=500,smoo = 0.3) %>% capture_par(true.par = true.par1)
 }
-#simsettings[k,4] <- mean(cover)
-#}
+simsettings[k,4] <- mean(cover)
+}
+library(kableExtra)
+kable(simsettings)%>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
 # Conclusion
