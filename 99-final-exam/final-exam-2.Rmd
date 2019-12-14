@@ -1,0 +1,474 @@
+---
+title: "Final Exam 2"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+`???` <- 5 # This is just so the document compiles.
+require(magrittr)
+require(dplyr)
+```
+
+# Instructions
+
+1. Only complete the sections for which you want a better score.  (Complete all questions within a section.)
+2. After completing the exam:
+   + Delete any sections that you did not complete.
+   + Save the exam as final-exam-2.rmd and final-exam-2.html in the 99-final-exam folder of your Probability and Inference Portfolio repo.
+   + Push your repo.
+
+# 1. Simulation
+
+The Monte Hall problem is a classic game show.  Contestants on the show where shown three doors.  Behind one randomly selected door was a sportscar; behind the other doors were goats.
+
+At the start of the game, contestants would select a door, say door A.  Then, the host would open either door B or C to reveal a goat.  At that point in the game, the host would ask the contestant if she would like to change her door selection.  Once a contestant decided to stay or change, the host would open the choosen door to reveal the game prize, either a goat or a car.
+
+In this problem, consider a **modified** version of the Monte Hall problem in which the number of doors is **variable**.  Rather than 3 doors, consider a game with 4 or 5 or 50 doors.  In the modified version of the game, a contestant would select an initial door, say door A.  Then, the host would open **one** of the remaining doors to reveal a goat.  At that point in the game, the host would ask the contestant if she would like to change her door selection.  Once a contestant decided to stay or change, the host would open the choosen door to reveal the game prize, either a goat or a car.
+
+Consider two strategies:
+  
+  1. Always stay with the first door selected.
+  2. Always switch to the unopened door.
+
+**C.** The function `game` below plays a single game of Monte Hall.  The function returns a vector of length two, the first element is the prize under strategy 1 and the second element is the prize under strategy 2.  The function has a single input parameter, N, which is the number of doors in the game.
+
+Use the `game` function to estimate the probability that both strategies result in a goat. Let **N=4**.
+
+**HINT:** Create an Rx2 array, and store the results of each game as a row in the array.  Create a cross tabulation of the winnings from strategy 1 and strategy 2.
+
+```{r}
+game <- function(N){
+  if(N<3) stop("Must have at least 3 doors")
+  prize <- sample(c(rep("goat",N-1),"car"), N)
+  guess <- sample(1:N,1)
+  game <- data.frame(door = 1:N, prize = prize, stringsAsFactors = FALSE) %>% 
+    mutate(first_guess = case_when(
+      door == guess ~ 1
+      , TRUE ~ 0
+    )) %>% 
+    mutate(potential_reveal = case_when(
+        first_guess == 1 ~ 0
+      , prize == "car" ~ 0
+      , TRUE ~ 1
+    )) %>% 
+    mutate(reveal = 1*(rank(potential_reveal, ties.method = "random") == 3)) %>% 
+    mutate(potential_switch = case_when(
+      first_guess == 1 ~ 0
+      , reveal == 1 ~ 0
+      , TRUE ~ 1
+    )) %>% 
+    mutate(switch = 1*(rank(potential_switch, ties.method = "random") == 3))
+  c(game$prize[game$first_guess == 1], game$prize[game$switch == 1])
+}
+```
+
+**B**. Continuing from part **C**, what is the probability that at least one of the strategies results in winning a car?
+
+**HINT:** Use the cross tabulation from the previous part to calculate this probability.
+
+**A**. Communicate the precision of your simulated probability in part **B** by calculating a **99\%** confidence interval.
+
+**HINT:** Use the CLT short cut.
+
+# 2. Probability
+
+The following table is the joint distribution of computer and operating system preferences of Vanderbilt faculty.
+
+| | Windows | Linux | MacOS |
+|:--|:--:|:--:|:--:|
+| Desktop | .1 | .3 | .3 |
+| Laptop | .1 | .0 | .2 |
+
+**C.** Calculate P(Laptop|Windows).
+
+**B.** Calculate P(Windows or Linux|Desktop).
+
+**A.** Suppose the same probability distribution for students is as follows:
+
+
+| | Windows | Linux | MacOS |
+|:--|:--:|:--:|:--:|
+| Desktop | .1 | .1 | .1 |
+| Laptop | .2 | .0 | .5 |
+
+If there is 1 faculty member for every 5 Vanderbilt students, what is P(Faculty| Windows desktop or windows laptop)?
+
+
+# 3. Discrete Distributions
+
+Consider a study designed to investigate the effectiveness of a new surgical technique. The study will enroll subjects until five subjects experience an infection after surgery.
+
+**C.** If the risk of infection after surgery is 0.1, what is the probability that the study will enroll 30 or fewer subjects?
+
+```{r}
+pnbinom(25,5,0.1)
+```
+
+**B.** If the risk of infection after surgery is 0.1, what is the expected number of subjects to be enrolled?
+
+```{r}
+mean(rnbinom(1000,5,0.1))+5
+```
+
+
+**A.** Suppose the risk of infection after surgery is unknown but equally likely to be either .1 or .2.  What is the probabilty that the risk of infection is .1 if the study ends after enrolling the 50th subject?
+
+```{r}
+dnbinom(45,5,0.1) / (dnbinom(45,5,0.1)+dnbinom(45,5,0.2))
+
+```
+
+# 4. Continuous Distributions
+
+Let X be distributed as a mixture normals.  The `r`, `p`, and `d` functions are below.  (This is our old friend `f3` from deliverable 5.)
+
+```{r, echo = TRUE}
+rf3 <- function(N){
+  G <- sample(0:2, N, replace = TRUE, prob = c(5,3,2))
+  (G==0)*rnorm(N) + (G==1)*rnorm(N,4) + (G==2)*rnorm(N,-4,2)
+}
+
+pf3 <- function(x){
+  .5*pnorm(x) + .3*pnorm(x,4) + .2*pnorm(x,-4,2)
+}
+
+df3 <- function(x){
+  .5*dnorm(x) + .3*dnorm(x,4) + .2*dnorm(x,-4,2)
+}
+```
+
+Let Y be distirbuted as another mixture of normals.  The `r`, `p`, and `d` functions are below.  (This is a slightly different distribution.)
+
+```{r, echo = TRUE}
+rf4 <- function(N){
+  G <- sample(0:2, N, replace = TRUE, prob = c(2,3,5))
+  (G==0)*rnorm(N) + (G==1)*rnorm(N,4) + (G==2)*rnorm(N,-4,2)
+}
+
+pf4 <- function(x){
+  .2*pnorm(x) + .3*pnorm(x,4) + .5*pnorm(x,-4,2)
+}
+
+df4 <- function(x){
+  .2*dnorm(x) + .3*dnorm(x,4) + .5*dnorm(x,-4,2)
+}
+```
+
+**C.** What is the .9 quantile of X?
+
+**B.** Suppose that X is the distribution of a biomarker when a patient is healthy.  Suppose Y is the distribution of the same biomarker when a patient has a genetic condition.  
+
+Calculate P(genetic condition is present | biomarker = 0) under the assumption that P(genetic condition) = 0.1.
+
+**A.**  Generate a plot of P(genetic condition is present | biomarker = B).  Let B length range from -6 to 6.
+
+```{r}
+B <- seq(-6, 6, by = .25)
+#prob_genetic_condition <- ???
+plot.new()
+plot.window(xlim = c(-6,6), ylim = c(0,1))
+#lines(B, prob_genetic_condition)
+axis(1)
+axis(2)
+box()
+title(xlab = "Biomarker value", ylab = "P( genetic condition | biomarker )")
+```
+
+# 5. Expectation and Variance
+
+Consider again the random variables X and Y from section 4.
+
+**C.** What is E[X+Y]?
+
+```{r}
+R<-rep(NA,1000)
+x_y<-rep(NA,1000)
+
+for (i in seq_along(R)){
+  Y<-rf4(1)
+  X<-rf3(1)
+  x_y[i]<-X+Y
+}
+
+mean(x_y)
+```
+
+
+**B.** What is E[exp(X-Y)]?
+
+```{r}
+R<-rep(NA,1000)
+out<-rep(NA,1000)
+for (i in seq_along(R)){
+  xmy<-rf3(1)-rf4(1)
+  out[i]<-exp(xmy/5)
+}
+
+mean(out)
+```
+
+
+**A.** What is V[(X+Y)*exp(X-Y)]?
+```{r}
+var(x_y*out)
+```
+
+
+# 6. Transformations & Sampling Distributions
+
+**C.** Consider the log normal distribution.  If X is a log normal random variable, then log(X) is a normal random variable.  One way to create pseudo-random draws from the log normal distribution is to generate draws from a normal distribution and then to transform the draws by expononentiating.  The parameters of the log normal distribution are the parameters of the underlying normal distribution, $\mu$ and $\sigma$ (or $\sigma^2$).  
+
+Log normal data are prevalent in biological systems and econometrics.
+
+Suppose a blood chemistry measure has a log normal distribution with $\mu$ = 0 and $\sigma$ = 1. Generate an histogram or density curve for the sampling distribution of the 50th order statistic when the sample size is 201.
+
+```{r}
+
+R<-rep(NA,5000)
+q_50<-rep(NA,5000)
+for (i in seq_along(R)){
+  lnorm<-rlnorm(201,0,1)
+  q_50[i]<-quantile(lnorm,50/201)
+}
+hist(q_50)
+
+```
+
+
+**B.** Below is the CDF function for the kth order statistic when the underlying distribution is log normal with $\mu$ = 0 and $\sigma$ = 1.  Create a plot of the ECDF of the simulated sampling distribution generated in **C** and overlay the CDF using the function below.
+
+```{r}
+
+Fk <- function(x,k,n){
+  pbinom(k-1, n, plnorm(x), lower.tail = FALSE)
+}
+
+plot(ecdf(q_50), xlab="50th order", main ="")
+curve(Fk(x,50,201),add =TRUE, col="blue", lwd =3)
+```
+
+**A.** Use simulation or analytic methods to generate the sampling distribution of the 25th percentile when the data is log normal($\mu=0$, $\sigma = 1$). Generate the sampling distribution for samples of size 201, 301, 401.  Generate a single plot with the density function from each setting overlayed.
+
+```{r}
+plot(seq(0.35,0.65,0.01),Fk(seq(0.35,0.65,0.01),50,201),type="l",lwd=3,xlab="25th percentile",ylab="Cumulative Density")
+lines(seq(0.35,0.65,0.01),Fk(seq(0.35,0.65,0.01),75,301),col="red",lwd=3)
+lines(seq(0.35,0.65,0.01),Fk(seq(0.35,0.65,0.01),100,401),col="blue",lwd=3)
+legend("topleft",c("N=201","N=301","N=401"), col = c("black","red","blue"), lwd = 3, bty = "n")
+
+```
+
+# 7. Estimation of CDF and PDF from data
+
+The following code will load the NHANES data and select the first 500 rows.
+
+```{r}
+Hmisc::getHdata(nhgh)
+d1 <- nhgh[1:500,]
+```
+
+**C.** Estimate the distribution of standing height for adult (age > 18) **females** using the MLE method with a normal distribution.  Create a plot of the estimated density function.
+
+
+```{r}
+f_height <- d1 %>% 
+  filter(sex == 'female') %>% 
+  filter(age > 18) %>%
+  pull(ht)
+
+hist(f_height, freq = FALSE)
+curve(dnorm(x, mean(f_height), sd(f_height)), add = TRUE)
+```
+
+
+**B.** Estimate the distribution of BMI for adult (age > 18) **males** using using the method of moment method with the gamma distribution. Create a plot of the estimated density function.
+
+
+```{r}
+bmi_m <- d1 %>% 
+  filter(sex == 'male') %>% 
+  filter(age > 18) %>%
+  pull(bmi)
+
+mm.shape <- mean(bmi_m)^2/var(bmi_m)
+mm.scale <- var(bmi_m)/mean(bmi_m)
+hist(bmi_m, freq = FALSE)
+curve(dgamma(x,shape=mm.shape,scale=mm.scale), add = TRUE)
+```
+
+
+**A.** Estimate the distribution of waist circumference for adults (age > 18) using the kernel density method with a gaussian kernel.  Create a plot of the estimated density function.
+
+```{r}
+waist_c <- d1 %>% 
+  filter(age > 18) %>%
+  pull(waist) 
+
+waist_c<-na.omit(waist_c)
+
+hist(waist_c,freq=FALSE)
+lines(density(waist_c,kernel = "gaussian"))
+```
+
+
+**HINT:**  You are not being asked to sample from the estimated distribution, so you don't need to estimate the CDF.  You only need to generate a plot of the estimated density function.
+
+# 8. Sample from an estimated distribution
+
+The following code will load the low birth weight data from the MASS package.  The description of the variables in the dataset can be found in the birthwt documentation with the command `?MASS::birthwt`.
+
+```{r}
+bwt <- MASS::birthwt
+```
+
+**C.** Generate a 95% confidence interval for the mean birthweight of infants whose mothers **did** smoke during pregnancy using the Central Limit Theorem shortcut.
+
+
+
+```{r}
+require(magrittr)
+sbwt <- bwt %>% 
+  filter(smoke == 1) %>% 
+  pull(bwt)
+t.test(sbwt,cof.level=0.95)
+```
+
+
+**B.** Let $\mu_s$ be the mean birthweight of infants whose mothers smoked during pregnancy.  Let $\mu_{ns}$ be the mean for the non-smoking group.  Use the bootstrap to calculate the 95% confidence interval for $\mu_s/\mu_{ns}$.
+
+
+```{r}
+nsbwt <- bwt %>% 
+  filter(smoke == 0) %>% 
+  pull(bwt)
+
+Run<-rep(NA,1000)
+out<-rep(NA,1000)
+for (i in seq_along(Run)){
+  samp_ns<-sample(nsbwt,length(nsbwt),replace=TRUE)
+  samp_s<-sample(sbwt,length(sbwt),replace = TRUE)
+  out[i]<-mean(samp_s)/mean(samp_ns)
+}
+quantile(out, c(0.025,0.975))
+```
+
+
+**A.** Generate a 95% confidence interval for the **median** birthweight of infants whose mothers **did NOT** smoke during pregnancy using KDE.  
+
+**Hint:** The following code estimates the CDF and draws single simulated dataset.
+
+```{r}
+bw_nosmoke <- bwt %>% filter(smoke==0) %>% pull(bwt)
+
+# Kernel density estimation
+ecdfstar <- function(t, data, smooth){
+  outer(t, data, function(a,b){ pnorm(a, b, smooth)}) %>% rowMeans
+}
+epdfstar <- function(t, data, smooth){
+  outer(t, data, function(a,b){ dnorm(a, b, smooth)}) %>% rowMeans
+}
+
+# Approximate q function with lookup table from KDE estimate
+tbl <- data.frame(
+    x = seq(600,5400,by = 0.01)
+)
+tbl$p <- ecdfstar(tbl$x, bw_nosmoke, 255)
+tbl <- tbl[!duplicated(tbl$p),]
+
+qf <- function(ps, tbl){
+  rows <- cut(ps, tbl$p, labels = FALSE)
+  tbl[rows, "x"]
+}
+
+
+N <- length(bw_nosmoke)
+R <- 5000
+U <- runif( N*R ) 
+Y <- qf(U, tbl)
+data <- array(Y, dim=c(N, R))
+med <- apply(data, 2, median) 
+med<-na.omit(med)
+quantile(med, c(0.025,0.975))
+
+```
+
+
+
+# 9.  Inference
+
+**C.** Suppose a study was performed looking at the risk of mild complication after hernia repair using open and laparoscopic surgical approaches.  The study results and analysis are below.  
+
+| Study 1 | Comp | No comp |
+|:---|:---|:---|
+| Open | 30 | 70 |
+| Lap  | 40 | 60 |
+
+```{r}
+prop.test(c(30,40), c(100,100))
+```
+
+Suppose the results were summarized as follows: "There were no difference in complication rates between open and laparoscopic approaches (p=0.18)." 
+
+Explain why the summary is or is not a fair conclusion to draw from the analysis.
+
+If there is a point null: One cannot identify conclusive similarities. Therefore, we can not “accept the null” nor “declare it to be true”, instead, we can only say that we fail to reject the null hypothesis: There were no difference in complication rates between open and laparoscopic approaches.
+
+
+**B.** Suppose that researchers established an equivalence threshold of 5 percentage points.  If the true rate of complications is 0.3 for both laparoscopic and open repairs, what is the probability of successfully showing a conclusive similarity when the sample size is 1000 in each group?
+
+**Hint:** Use the following to get started.
+
+```{r, warning = FALSE}
+R <- 5000
+N <- 1000 
+out <- rep(NA, R)
+for(i in 1:R){
+  open <- rbinom(1, N, .3)
+  lap <- rbinom(1, N, .3)
+  ci <- prop.test(c(open,lap), c(N, N))$conf.int
+  out[i] <- ci[1]>-0.05 & ci[2]<0.05
+}
+
+mean(out)
+
+```
+  
+**A.** Generate a plot with the probability of successfully showing a conclusive similarity on the Y-axis and sample size on the X-axis. Allow sample size to range from 100 to 5000.
+
+
+
+
+```{r}
+R <- 5000
+N <- seq(100,5000,200)
+out <- rep(NA,R)
+prob<-rep(NA,length(N))
+for(j in seq_along(N)){
+  for(i in 1:R){
+    open <- rbinom(1, N[j], .3)
+    lap <- rbinom(1, N[j], .3)
+    ci <- prop.test(c(open, lap), c(N[j], N[j]))$conf.int
+    out[i] <- ci[1]>-0.05 & ci[2]<0.05
+  }
+  prob[j] <- mean(out)
+}
+plot(x = N, y = prob, type = "l")
+
+```
+
+
+
+# 10.  Joint Distributions
+
+**C.** Explain why predictions from a conditional distribution generally have smaller prediction error than predictions from the marginal distribution.
+
+Mean squared error which is related to the prediction error is less in conditional than marginal 
+
+**B.** Below are plots of simultaneous draws of the 25th, 50th, and 75th percentiles from a sample of 301 draws generated from a log normal distribution with $\mu = 0$ and $\sigma = 1$.  Modify the code to calculate the correlation in each plot.  Add the estimated correlation to the plot.
+
+```{r}
+R <- 1000
+N <- 301
+rlnorm(R*N) %>% array(c(R,N)) %>% apply(1, quantile, probs = c(.25, .5, .75)) %>% t %>% pairs
+```
+
+**A.** Modify part **B** to include 37th and 63rd percentiles.  Explain why the correlations on the top row go from smallest to largest.
